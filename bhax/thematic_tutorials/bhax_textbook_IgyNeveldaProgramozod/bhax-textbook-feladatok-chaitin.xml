@@ -1,0 +1,511 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, Chaitin!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+    <section>
+        <title>Iteratív és rekurzív faktoriális Lisp-ben</title>
+        <para>
+            A Lisp nyelvvel én ebben a feladatban találkoztam először. Az általam eddig megismert programnyelvektől lényeges különbözik. 
+            De nézzük is meg miért lóg ki annyira a sorból!
+        </para>
+        <para>
+            A Lisp-et 1958-ban alkotta meg John McCarthy, ekkor vált felkapott témává előszőr a mesterséges intelligencia kutatás és a Lisp nyelv 
+            szinte egybe olvadt annak fogalmával. A mesterséges intelligencia és a Lisp nyelv kapcsolata megalkotójához köthető, ugyanis John McCarthy 
+            aktívan részt vett az ezzel kapcsolatos kutatásokban is. Annak ellenére, hogy nem mai nyelv, napjainkban is van haszna, a GNU Emacs szövegszerkesztő 
+            is használja a Lisp-et.
+        </para>
+        <para>
+            Ami a Lisp nyelvet illeti, fő adatstruktúrája a láncolt lista, innen kapta a nevét is, angolul "List Processing", innen ered a "Lisp" mint 
+            rövidítés. gymásba ágyazott láncolt listákkal dolgozik, primitív szintaktika és egyszerű függvéynek jellemzik, ugyanis minden kifejezést zárójelek 
+            közé kell tennünk. Ennek előnye, hogy a számítógép számára könynen értelmezhető, interpreter, a Python-hoz hasonló módon nem szükséges a Lisp nyelven írt programokat 
+            fordítani, értelmező nyelvről beszélünk. Ez azt jeleti a Lisp esetében, hogy a láncolt listákat először beolvassa majd kiértékeli és kiírat. 
+            Elsőre nagyon furcsa lehet a szintaktikája, főleg a prefix jelölést értem ez alatt, ami azt jelenti, hogy egy művelet megfogalmazása esetén az operátor
+            előre kerül majd az operandusok azt követik. Ilyennel én először az elsőrendű logikai nyelveknél találkoztam, azok közül is én a Lisp-et az Ar, 
+            azaz az elemi aritmetika nyelvéhez tudom hasonlítani. Az Ar nyelv is alapvetőleg prefix, viszont be tudunk vezetni infix jelöléseket is. Amit pedig még 
+            mindenképp meg szeretnék említteni a Lisp nyelvvel kapcsolatban, hogy nagyon könnyen fejleszthető, ami alatt azt értem, hogy könnyen hozhatunk létre 
+            új, saját függvényeket és operátorokat emiatt "személyre szabható" és így napjainkban sem mondhatjuk rá, hogy elavult nelvről beszélünk. 
+            Az Ar nyeelv, ahogy említettem, számomra nagyon hasonló, az Ar nyelv is alapvetőleg egy db predikátumszimbólummal dolgozik, ami az egyenlőség fogalma 
+            és 3 db függvényszimbólummal, ami a rákövetkező függvény, a szorzás és az öszeadás, ezekből és 1 db konstans használatával az Ar nyelvben a teljes aritmetika 
+            felépíthető elemi lépésekre való lebontással, arról nem is beszélve, hogy a zárójelhasználat is nagyon hasonló.
+        </para>
+        <para>
+            Egy kis kitekintés az Ar nyelvre: 
+        </para>
+
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/arnyelv.jpg" format="JPG" scale="25" />
+            </imageobject>
+        </mediaobject> 
+
+        <para>
+            Térjünk rá a faktoriális számító programra! Először is tekintsük meg a faktoriális matemaitkai hátterét, két képletet 
+            alkalmaztunk a programhoz, az első amivel foglalkozni szeretnék az a rekurzív képlet. Itt az az alapgondolat, hogy 
+            <command>n! = n * (n -1)!</command>, tehát, ha írunk egy faktoriális kiszámítására szolgáló függvényt, melynek paramétere 
+            <command>n</command> rekurzívan <command>(n -1)</command>-gyel fogjuk meghívni. Szerintem ez volt az egyszerűbb feladat, és megmutatom 
+            hozzá a Lisp nyelvű kódot is. 
+        </para>
+
+        <para>
+            Megjegyzés: mielőtt futtatni szeretnénk a programot, győződjünk meg róla hogy telepítve van a szükséges csomag, amennyiben nincs 
+            a <screen>sudo apt-get install clisp</screen> paranccsal tudjuk telepíteni, illetve, ha már megírtuk a kódot, futtatási jogot kell 
+            adnunk neki.
+        </para>
+        <programlisting><![CDATA[
+        (defun faktorialis_rekurziv (n)
+        (if (= n 0)
+        1
+        (* n (faktorialis_rekurziv(- n 1)))) )]]>
+        </programlisting> 
+        <para>
+            Láthatjuk, hogy a függvényel belül először azt vizsgáljuk, hogy az <command>n</command> egyenlő-e nullával, ennek az a jelentősége, 
+            hogy definíció szerint 0! az 1, célszerű ezzel kezdenünk. A függvény további részeiben a rekurzív hiívást találjuk az előbb említett 
+            képlet szerint. Láttam az interneten olyan megoldást is, ahol az <command>n = 1</command> esetére is külön feltételt vizsgáltak, de 
+            ebben a programban az teljesen feleslegessé válna a 0 miatt, ugyanis a rkurzív hívás során ha <command>n = 1</command> akkor <command>(n -1)!</command>-sal 
+            szorzódik ami ugye 1 lesz, tehát 1 * 1-et kapunk.
+        </para>
+        <para>
+            A másik megoldás az itratív képletet használja, ehhez létre kellett hoznunk egy <command>f</command> "lokális változót", majd a <command>dotimes</command> 
+            függvénnyel <command>n</command> alkalommal megszorozza a szám rákövtkezőjével, tehát az iteratív megoldás, fordítva halad és mindig <command>f</command>-et 
+            ad vissza.
+        </para>
+
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/fakt_it.jpg" format="JPG" scale="30" />
+            </imageobject>
+        </mediaobject> 
+        <para>
+            <link xlink:href="https://hu.wikipedia.org/wiki/Faktori%C3%A1lis">Iteratív képlet a Wikipédiáról</link>      
+        </para>
+        <warning>
+              <title>Megoldás videó:</title>
+              <para>
+                  <link xlink:href="https://youtu.be/715zDYo4Fz0">A program futásáról készült videóm itt található.</link>  
+              </para>            
+            </warning> 
+    
+        <programlisting><![CDATA[
+        (defun faktorialis_iterativ (n)
+        (let ((f 1))
+        (dotimes (i n)
+        (setf f (* f (+ i 1))))
+        f
+    )
+)
+        ]]>
+        </programlisting> 
+
+        <para>
+            A programomat annyival még kiegszítettem, hogy az enyém bekéri az <command>n</command>-t, tehát nem a kódban kell meghatároznunk meddig szeretnénk a 
+            faktoriálist számolni.
+        </para>
+        <para>
+            Mivel a program rövid ezért ide beillesztem az egész forrást: 
+        </para>
+        <programlisting><![CDATA[
+        #!/usr/bin/clisp
+
+(format t "Irj be egy szamot!~%")
+(setq n (read))
+
+(defun faktorialis_iterativ (n)
+    (let ((f 1))
+        (dotimes (i n)
+        (setf f (* f (+ i 1))))
+        f
+    )
+)
+
+(defun faktorialis_rekurziv (n)
+    (if (= n 0)
+        1
+        (* n (faktorialis_rekurziv(- n 1)))) )
+
+(format t "Rekurziv szamitas:~%")
+
+(loop for i from 0 to n
+    do (format t "~D! = ~D~%" i (faktorialis_rekurziv i)))
+
+(format t "Iterativ szamitas:~%")
+
+(loop for i from 0 to n
+    do (format t "~D! = ~D~%" i (faktorialis_iterativ i)))
+        ]]>
+        </programlisting> 
+        <para>
+            A feladat megoldásához használtam<link xlink:href="https://youtu.be/3jcDl4pHFMI">Besenczi Renátó videóját</link> illetve 
+            az alábbi oldalakról gyűjtöttem információókat: 
+            <link xlink:href="http://ait.iit.uni-miskolc.hu/~dudas/MIEAok/MIea5.PDF">http://ait.iit.uni-miskolc.hu/~dudas/MIEAok/MIea5.PDF</link>
+            <link xlink:href="http://nyelvek.inf.elte.hu/leirasok/Lisp/index.php?chapter=1">http://nyelvek.inf.elte.hu/leirasok/Lisp/index.php?chapter=1</link>
+        </para>
+        
+    </section>        
+       
+    <section>
+        <title>Malmö kód továbbfejlesztése</title>
+        <warning>
+              <title>Megoldás videó:</title>
+              <para>
+                    Ez a program, az előző kettő fejezetben tárgyalt programokon alapszik, viszont itt már sok fejlesztést tettünk bele. Ezzel a 
+                    kóddal neveztem én és Czanik András csapatban a RFH III. versenyre és a tabellán 16. helyre kerültünk vele. 
+                    <link xlink:href="https://youtu.be/dJIENaPaoFM">A kvalifikációs videónk itt található.</link>
+                    Illetve készítettünk egy bemutatkozós, kódmagyarázós videót is 
+            <link xlink:href="https://youtu.be/FkCpuH7hpCQ">Ami itt elérhető.</link>
+              </para>            
+            </warning> 
+        <para>
+            
+        </para>
+        <para>
+            Steve átlagosan 27 virágot tud összegyűjteni, ez elég volt a kvalifikációhoz. A program lényege hogy Steve gyorsan felszalad a 
+            30. szintre (ami virágszámban 28-at jelentne) és onnan kezdve csigavonalban halad lefelé úgy hogy az aréna fala tőle balra van. 
+            Amint virágot érzékel azt felveszi és jobbra ugrással az eggyel lentebbi szintre megy, ennek az a lényege, hogy olyan szinten 
+            amelyen már vett fel virágot ne időzzön tovább. Viszont nézzük meg a kódot!
+        </para>
+
+        <para>
+            Az előző kódokból átvett lényegi rész a <command>calcNbrIndex()</command> függvény. Ennek az a lényege, hogy ugye mint azt már tudjuk 
+            Steve egy cuboid-ban lát, viszont amikor elfordul egy sarokban, a cuboid nem fordul együtt vele ezért ugyanazokra a tömbbeli elemekre 
+            hivatkozva nem tudjuk elérni, hogy megfelelően reagáljon. Ez a függvény a <command>yaw</command> értékből, ami Steve elfprdulását 
+            hivatott leírni, számolja ki, hogy a cuboid mely eleme lesz az amit keresünk adott elfordulás esetén.
+        </para>
+
+        <programlisting><![CDATA[
+        def calcNbrIndex(self):
+        if self.yaw >= 180-22.5 and self.yaw <= 180+22.5 :
+            self.front_of_me_idx = 1
+            self.front_of_me_idxr = 2
+            self.front_of_me_idxl = 0
+            self.right_of_me_idx = 5
+            self.left_of_me_idx = 3            
+        elif self.yaw >= 180+22.5 and self.yaw <= 270-22.5 :
+            self.front_of_me_idx = 2 
+            self.front_of_me_idxr = 5
+            self.front_of_me_idxl =1             
+            self.right_of_me_idx = 8
+            self.left_of_me_idx = 0            
+        elif self.yaw >= 270-22.5 and self.yaw <= 270+22.5 :
+            self.front_of_me_idx = 5
+            self.front_of_me_idxr = 8
+            self.front_of_me_idxl = 2
+            self.right_of_me_idx = 7
+            self.left_of_me_idx = 1                        
+        elif self.yaw >= 270+22.5 and self.yaw <= 360-22.5 :
+            self.front_of_me_idx = 8            
+            self.front_of_me_idxr = 7
+            self.front_of_me_idxl = 5          
+            self.right_of_me_idx = 6
+            self.left_of_me_idx = 2                        
+        elif self.yaw >= 360-22.5 or self.yaw <= 0+22.5 :
+            self.front_of_me_idx = 7
+            self.front_of_me_idxr = 6
+            self.front_of_me_idxl = 8
+            self.right_of_me_idx = 3
+            self.left_of_me_idx = 5                        
+        elif self.yaw >= 0+22.5 and self.yaw <= 90-22.5 :
+            self.front_of_me_idx = 6
+            self.front_of_me_idxr = 3
+            self.front_of_me_idxl = 7          
+            self.right_of_me_idx = 0
+            self.left_of_me_idx = 8                        
+        elif self.yaw >= 90-22.5 and self.yaw <= 90+22.5 :
+            self.front_of_me_idx = 3
+            self.front_of_me_idxr = 0
+            self.front_of_me_idxl = 6
+            self.right_of_me_idx = 1
+            self.left_of_me_idx = 7                        
+        elif self.yaw >= 90+22.5 and self.yaw <= 180-22.5 :
+            self.front_of_me_idx = 0
+            self.front_of_me_idxr = 1
+            self.front_of_me_idxl = 3
+            self.right_of_me_idx = 2
+            self.left_of_me_idx = 6                        
+        else:
+            print("There is great disturbance in the Force...")   
+        ]]>
+        </programlisting> 
+
+        <para>
+            Az alábbi rész a felszaladásért felelős for ciklust tartalmazza, illetve előkészítjük Steve-t a csiga vonalban 
+            történő mozgás megkezdésére. Fontos volt hogy beállítsuk a program elején, hogy folyamatosan lefelé nézzen, így 
+            könnyeben üti ki a virágokat, nem kell arra várnunk, hogy rá is nézzen azokra.
+        </para>
+        <programlisting><![CDATA[
+        i = 0
+        for i in range(30):
+            self.agent_host.sendCommand( "jumpmove 1" )
+            time.sleep(0.1)
+            self.agent_host.sendCommand( "move 1" )
+            time.sleep(0.1)
+        
+        self.agent_host.sendCommand( "turn 1" )
+        time.sleep(0.2)
+        self.agent_host.sendCommand( "look 1" )
+        self.agent_host.sendCommand( "look 1" )
+        ]]>
+        </programlisting> 
+
+        <para>
+            A program többi része úgy működik, hogy különböző feltételek teljesülését vizsgáljuk, ezeket bemutatom. Az alábbi kódcsipetben Steve
+            a sarkokat figyeli, tudnia kell, hogy mikor forduljon jobbra egy sziten. 
+        </para>
+        <programlisting><![CDATA[
+        if nbr[self.front_of_me_idx+9] == "dirt" and nbr[self.left_of_me_idx+9] == "dirt":
+            self.agent_host.sendCommand( "turn 1" )
+            time.sleep(0.2)
+
+        else:
+            print("There is no corner")
+        ]]>
+        </programlisting> 
+        <para>
+            Tettünk a programba egy lávakerülésre használt részt, amennyiben Steve lávát érzékel, jobbra ugrik kettőt, az aréna belseje 
+            felé. Ezt a program futása során ritkán használta és az is a potenciálisan megszerezhető virágok elvesztésével járt, 
+            viszont meg tudta úszni a lávával való találkozást. 
+        </para>
+        <programlisting><![CDATA[
+        if nbr[self.left_of_me_idx+18]=="flowing_lava" or nbr[self.front_of_me_idx+9]=="flowing_lava" or nbr[self.front_of_me_idx+18]=="flowing_lava":
+            self.agent_host.sendCommand( "strafe 1" )
+            time.sleep(0.1)
+            self.agent_host.sendCommand( "strafe 1" )
+            time.sleep(0.1)
+        ]]>
+        </programlisting>
+        <para>
+            Az következő részt azért kellet a programba tenni, mert Steve ha virágot talál gyakran aföldet is kiüti alóla és egyben 
+            maga alól, "csapdába kerül" ilyenkor ki kell ugrania belőle. Kiegészítettük jobbra ugrásokkal is mivel ilyenkor gyakran egy szinttel 
+            lentebb kell folytatnia a mozgását.
+        </para>
+        <programlisting><![CDATA[
+        if nbr[self.front_of_me_idx+9]=="dirt" and nbr[self.right_of_me_idx+9]=="dirt" and nbr[self.left_of_me_idx+9]=="dirt":
+            print("     IT'S A TRAAAAP")
+            self.agent_host.sendCommand( "jumpmove 1" )
+            time.sleep(0.1)
+
+        if nbr[self.front_of_me_idx+9]=="dirt" and nbr[self.left_of_me_idx+9]=="air":
+            self.agent_host.sendCommand( "turn 1" )
+            time.sleep(0.2)
+            self.agent_host.sendCommand( "jumpstrafe 1" )
+            time.sleep(0.1)
+            self.agent_host.sendCommand( "jumpstrafe 1" )
+            time.sleep(0.1)
+        ]]>
+        </programlisting> 
+        <para>
+            Elérkeztünk Steve virágszedéséhez, ha virágot talál meghívódik a <command>pickup()</command> függvény, azaz kiüti a 
+            virágot, itt találunk egy kevés késleltetést ami azért kell, hogy a kiütött virágot fel is tudja szedni, majd kettőt 
+            jobbra ugrik, tehát megy a következő szintre.
+        </para>
+        <programlisting><![CDATA[
+        if nbr[self.front_of_me_idx+9]=="red_flower":
+            print("    VIRAGOT SZEDEK!!")
+            #self.agent_host.sendCommand( "move 1" )
+            #time.sleep(0.2)
+            self.pickUp()
+            time.sleep(0.2)
+            self.agent_host.sendCommand( "jumpstrafe 1" )
+            time.sleep(0.1)
+            self.agent_host.sendCommand( "jumpstrafe 1" )
+            time.sleep(0.1)
+        ]]>
+        </programlisting> 
+        <para>
+            Ezekben a sorokban pedi az általános eseteket találjuk, amikor Steve-nek nincs más dolga mint menni és lépésenként 
+            ellenőrzni, hogy mi található a környezetében, hogy megfelően tudjon reagálni. Tehát az alap esetben egyet lép mindig előre.
+        </para>
+        <programlisting><![CDATA[
+        if nbr[self.front_of_me_idx+9] == "air" and nbr[self.front_of_me_idx] == "dirt":
+            self.agent_host.sendCommand( "move 1" )
+            time.sleep(0.05)
+
+        if nbr[self.front_of_me_idx+9] == "air" and nbr[self.front_of_me_idx] == "air":
+            self.agent_host.sendCommand( "move 1" )
+            time.sleep(0.05)
+        ]]>
+        </programlisting> 
+        <para>
+            Ebben a feladatban <link xlink:href="https://gitlab.com/situ26/bhax">Szoboszlai István</link> volt a tutorom, egész 
+            pontosan ami a C++ megvalósítást illeti. Mivel a C++ megoldás szinte teljesen ugyanaz mint a Python-os ezért ott nem fogom 
+            taglalni a kódot csak beillsztem ide annak lényegi részeit. És a C++ futásról készült videó pedig <link xlink:href="https://youtu.be/dJIENaPaoFM">itt található.</link>
+        </para>
+        <programlisting><![CDATA[
+         for (int i = 0; i < 30; i++)
+    {
+        agent_host.sendCommand("jumpmove 1");
+        boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+        agent_host.sendCommand("move 1");
+        boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+    }
+    agent_host.sendCommand("turn 1");
+    boost::this_thread::sleep(boost::posix_time::milliseconds(200));
+    agent_host.sendCommand("look 1");
+    agent_host.sendCommand("look 1");
+
+    // main loop:
+    do {
+
+        if(world_state.number_of_observations_since_last_state != 0)
+        {
+            std::stringstream ss;
+            ss << world_state.observations.at(0).get()->text;
+            boost::property_tree::ptree pt;
+            boost::property_tree::read_json(ss, pt);
+
+            vector<std::string> nbr3x3;
+
+            nbr3x3 = GetItems(world_state,ss,pt);
+            for(vector< boost::shared_ptr< TimestampedString>>::iterator it = world_state.observations.begin();it !=world_state.observations.end();++it)
+            {
+            boost::property_tree::ptree pt;
+            istringstream iss((*it)->text);
+            boost::property_tree::read_json(iss, pt);
+
+            //string x =pt.get<string>("LineOfSight.type");	
+            //string LookingAt =pt.get<string>("XPos");
+            //y = pt.get<double>("YPos");
+            yaw = pt.get<double>("Yaw");
+            //cout<<" Steve's Coords: "<<y<<" "<<yaw<<" "<<"RF:"<<virag;
+            }
+
+            calcNbrIndex();
+
+            //checking corners
+
+            if (nbr3x3[front_of_me_idx+9] == "dirt" && nbr3x3[left_of_me_idx+9] == "dirt")
+            {
+                agent_host.sendCommand("turn 1");
+                boost::this_thread::sleep(boost::posix_time::milliseconds(300));
+            }
+            else 
+                cout << "\nThere is no corner";
+
+            //checking lava
+            if (nbr3x3[left_of_me_idx+18] == "flowing_lava" || nbr3x3[front_of_me_idx+9] == "flowing lava"
+                || nbr3x3[front_of_me_idx+18] == "flowing_lava")
+            {
+                agent_host.sendCommand("strafe 1");
+                boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+                agent_host.sendCommand("strafe 1");
+                boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+            }
+
+            //checking traps
+            if (nbr3x3[front_of_me_idx+9] == "dirt" && nbr3x3[right_of_me_idx+9] == "dirt" 
+                && nbr3x3[left_of_me_idx+9] == "dirt")
+            {
+                cout << "\nIt's a TRAAAAP";
+                agent_host.sendCommand("jumpmove 1");
+                boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+            }
+
+            if (nbr3x3[front_of_me_idx+9] == "dirt" && nbr3x3[left_of_me_idx+9] == "air")
+            {
+                agent_host.sendCommand("turn 1");
+                boost::this_thread::sleep(boost::posix_time::milliseconds(200));
+                agent_host.sendCommand("jumpstrafe 1");
+                boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+                agent_host.sendCommand("jumpstrafe 1");
+                boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+            }
+
+            //finding flower
+            if (nbr3x3[front_of_me_idx+9] == "red_flower")
+            {
+                cout << "\nVIRÁGOT SZEDEK!!";
+                agent_host.sendCommand("attack 1");
+                boost::this_thread::sleep(boost::posix_time::milliseconds(230));
+                boost::this_thread::sleep(boost::posix_time::milliseconds(200));
+                agent_host.sendCommand("jumpstrafe 1");
+                boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+                agent_host.sendCommand("jumpstrafe 1");
+                boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+            }
+
+            if (nbr3x3[front_of_me_idx+9] == "air" && nbr3x3[front_of_me_idx] == "dirt")
+            {
+                agent_host.sendCommand("move 1");
+                boost::this_thread::sleep(boost::posix_time::milliseconds(50));
+            }
+
+
+            if (nbr3x3[front_of_me_idx+9] == "air" && nbr3x3[front_of_me_idx] == "air")
+            {
+                agent_host.sendCommand("move 1");
+                boost::this_thread::sleep(boost::posix_time::milliseconds(50));
+            }
+        }
+        ]]>
+        </programlisting> 
+        
+    </section>        
+<!-- 
+    <section>
+        <title>Gimp Scheme Script-fu: króm effekt</title>
+        <para>
+            Írj olyan script-fu kiterjesztést a GIMP programhoz, amely megvalósítja a króm effektet egy 
+            bemenő szövegre!
+        </para>
+        <para>
+            Megoldás videó: <link xlink:href="https://youtu.be/OKdAkI_c7Sc">https://youtu.be/OKdAkI_c7Sc</link>      
+        </para>
+        <para>
+            Megoldás forrása: <link xlink:href="https://gitlab.com/nbatfai/bhax/tree/master/attention_raising/GIMP_Lisp/Chrome">https://gitlab.com/nbatfai/bhax/tree/master/attention_raising/GIMP_Lisp/Chrome</link>               
+        </para>
+        <para>
+            Tanulságok, tapasztalatok, magyarázat...
+        </para>    
+    </section>        
+
+    <section>
+        <title>Gimp Scheme Script-fu: név mandala</title>
+        <para>
+            Írj olyan script-fu kiterjesztést a GIMP programhoz, amely név-mandalát készít a
+            bemenő szövegből!               
+        </para>
+        <para>
+            Megoldás videó: <link xlink:href="https://bhaxor.blog.hu/2019/01/10/a_gimp_lisp_hackelese_a_scheme_programozasi_nyelv">https://bhaxor.blog.hu/2019/01/10/a_gimp_lisp_hackelese_a_scheme_programozasi_nyelv</link>      
+        </para>
+        <para>
+            Megoldás forrása: <link xlink:href="https://gitlab.com/nbatfai/bhax/tree/master/attention_raising/GIMP_Lisp/Mandala">https://gitlab.com/nbatfai/bhax/tree/master/attention_raising/GIMP_Lisp/Mandala</link>               
+        </para>
+        <para>
+            Tanulságok, tapasztalatok, magyarázat...
+        </para>            
+    </section>     -->   
+
+<!--    
+    <section>
+        <title>Lambda</title>
+        <para>
+            Hasonlítsd össze a következő programokat!
+        </para>
+        <para>
+            Megoldás videó: <link xlink:href=""></link>      
+        </para>
+        <para>
+            Megoldás forrása: <link xlink:href=""></link>               
+        </para>
+        <para>
+            Tanulságok, tapasztalatok, magyarázat...
+        </para>            
+    </section>        
+-->    
+
+<!--
+    <section>
+        <title>Malmö</title>
+        <para>
+        </para>
+        <para>
+            Megoldás videó:
+        </para>
+        <para>
+            Megoldás forrása:                
+        </para>
+    </section>        
+-->                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+</chapter>                

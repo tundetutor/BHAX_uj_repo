@@ -1,0 +1,920 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, Chomsky!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+    <section>
+        <title>Decimálisból unárisba átváltó Turing gép</title>
+        <para>
+            Állapotátmenet gráfjával megadva írd meg ezt a gépet!
+        </para>
+        <para>
+            Először is mindenképp be szeretném mutatni a decimális és az unáris számrendszert. A decimális a jól ismert tízes számrendszer, 
+            melyben 10 számjegyből (0-9) tudjuk leképezni a számokat. Általáos iskolából emlékezhetünk arra, hogy az ilyen
+            tízes számrendszerbeli számokat oly módon írtuk fel hogy milyen számok vannak egyes helyiértékeken, pl.: egyes,
+            tízes, százas, ezres. stb. Az adott helyiértéken álló számjegyet meg kell szoroznunk a helyiértékkel, majd ezekből 
+            összeget képzünk. Tehát pl.: a 321 = 3*100 + 2*10 + 1*1.
+        </para>
+        
+        <para>
+            Az egyes számrendszer olyan számrendszer melyben a számokat 1 számjeggyel az 1-essel
+            tudjuk leirni mégpedig oly módon, hogy amennyi maga a szám egymás után annyi egyest írunk pl.: 3 = 111.
+            A gép a két számrendszer között úgy vált át hogy a decimális számból addig von ki 1-eseket amíg az 0 nem lesz.
+        </para>
+        <para>
+            Ha ezt az átváltást program segítségével szeretnénk lemodellezni megoldás lehet ha mondjuk egy while ciklust használnunk
+            amelynek kilépési feltétele hogy a decimális számuk 0 legyen. A ciklus törzsében minden lefutáskor levonunk a decimális
+            számból egyet és egy 1-es számjegyet kiíratunk a kimenetre. Az én C nyelvű programom is iylen logika szerint működik így néz ki:               
+        </para>
+
+         <programlisting language="c"><![CDATA[ 
+        #include <stdio.h>
+
+int main()
+{
+    int decszam;
+    scanf("%d", &decszam);
+    
+    while( !(decszam == 0 ))
+    {
+        printf("1");
+        decszam--;
+    }
+}
+            ]]>
+        </programlisting>
+        
+
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/unaris.jpg" format="JPG" scale="60" />
+            </imageobject>
+        </mediaobject> 
+        <para>
+            Én az ábráimat kézzel szeretem rajzolni, szóval ide is egy ilyen ábra kerül. Ugye látható, hogy bekérünk egy tetszőleges decimális számot, 
+            ha az 0 a program leáll, amennyiben nem 0 kiír egy 1-est és csökkenti a számot 1-gyel majd ismét ellenőrzi a feltételt.
+        </para>
+
+        
+        
+       
+    </section>        
+        
+
+  <!--  <section>
+        <title>3.2 Az a<superscript>n</superscript>b<superscript>n</superscript>c<superscript>n</superscript> nyelv nem környezetfüggetlen</title>
+        <para>
+            Mutass be legalább két környezetfüggő generatív grammatikát, amely ezt a nyelvet generálja!
+        </para>
+        <para>
+            Megoldás videó:
+        </para>
+        <para>
+            A generativ grammatika olyan nyeltani szabályrendszert jelent melyben véges számú szóból és véges szóból és 
+            véges számú szabályból végtelen számú mondatot lehet alkotni.                
+        </para>
+        <para>
+            Sok olyan jelenség van am it nem lehet környezetfüggetlen nyelveken leirni, ilyen pl.:a természetes nyelvek, a 
+            primszámok halmaza.
+            A környezetfüggő nyelvek zártak a halmazmüveletekre az unió müveletet leszámitva.
+            S (S → aXbc)
+            aXbc (Xb → bX)
+            abXc (Xc → Ybcc)
+            abYbcc (bY → Yb)
+            aYbbcc (aY → aaX)
+            aaXbbcc (Xb → bX)
+            aabXbcc (Xb → bX)
+            aabbXcc (Xc → Ybcc)
+            aabbYbccc (bY → Yb)
+            aabYbbccc (bY → Yb)
+            aaYbbbccc (aY → aa)
+            aaabbbccc 
+        </para>
+        <para>
+            A (A → aAB)
+            aAB ( A → aAB)
+            aaABB ( A → aAB)
+            aaaABBB ( A → aC)
+            aaaaCBBB (CB → bCc)
+            aaaabCcBB (cB → Bc)
+            aaaabCBcB (cB → Bc)
+            aaaabCBBc (CB → bCc)
+            aaaabbCcBc (cB → Bc)
+            aaaabbCBcc (CB → bCc)
+            aaaabbbCccc (C → bc)
+            aaaabbbbcccc
+        </para>
+    </section>  -->
+
+                
+    <section>
+        <title>Hivatkozási nyelv</title>
+        <para>
+            A <citation>KERNIGHANRITCHIE</citation> könyv C referencia-kézikönyv/Utasítások melléklete alapján definiáld 
+            BNF-ben a C utasítás fogalmát!
+            Majd mutass be olyan kódcsipeteket, amelyek adott szabvánnyal nem fordulnak (például C89), mással (például C99) igen.
+        </para>
+        <para>
+            A BNF, azaz Backus-Naur-forma vagy Backus normálforma egy John backus által 1959-ben létrehozott környezetfüggetlen szintaxis, 
+            a leggyakoribb használata a programozási nyelvek leírása. 
+        </para>
+        <para>
+            A C nyelvi utasítás fogalmának szintaktikai definiciója BNF szintaxisban:
+        </para>
+    
+        <programlisting language="algol">
+                <![CDATA[
+                   
+<utasitás>::=
+         <összetett_utasitás>
+         <kifejezés>; (értékadás pl, num=10)
+         if(<kifejezés>) <utasitás>
+         else if(<kifejezés>) <utasitás>
+         else <utasitás>
+         switch (<kifejezés)
+         <egész_konstans_kifejezés : <utasitás>
+         goto <azonositó>;
+         <azonositó> : <utasitás>
+         break; continue; return<kifejezés>;
+         or(<kifejezés1><kifejezés2><kifejezés3>) <utasitás>
+         while(<kifejezés>) <utasitás>
+         do <utasitás> while<kifejezés>
+         ; (üres utasitás, pl FORTRAN continue-ja)
+
+]]>
+        </programlisting>
+        <para>
+            A C nyelv 1989-ben jött létre és az első szabvány verziója a "ANSI C89" azaz amit mi a könyvben C89-nek hívunk. A C99-et 2000-ben 
+            mutatták be, azért 99 mert már 1999-ben gyakorlatilag létezett de hivatalosan 2000-ben vált az új C szabvánnyá. Olyyan változtatások vannak a 
+            C99-es szabványban a C89-cel szemben mint a boolean típúsú változók bevezetése és az egysoros kommenteket is C99-től tudunk írni "//"-rel. Egyébként 
+            a két verzió között voltak más C szabványok is de ezek azok amelyek a legismertebbek és a legtöbbek által használtak. Fontos megemlíteni hogy 2011-ben 
+            mutatták be a C11-et amiben a párhuzamos számításokat segítő funkciók jelentek meg az egyre jobban trjedő többmagos processzorok miatt. 
+        </para>
+        <para>
+            Példa olyan programra ami a C89-es szabvánnyal nem fordul de C99-cel igen:
+        </para>
+        <programlisting language="c"><![CDATA[ 
+            int main()
+            {
+                for(int i = 0; i < 10; i++)
+                {
+                    printf("%d\n", i);
+                }
+            }
+            ]]>
+        </programlisting>
+        
+        <para>
+            Ebben a programban cikluson belül deklarálunk változót ami a C99-es szabványtól lehetséges. Ha C89-cel próbáljuk 
+            meg fordítani akkor a fordító javasolja is a C99 használatát. Egyébként nekem Arduino programozás során volt hasonló 
+            tapasztalatom, szintén cikluson belüli deklarálással próbálkoztam (sprólojunk egy sor kódot) viszont sehogy sem tudtam feltölteni a kódot 
+            az arduinora és a hibaüzenetben az szerepelt, hogy a ciklusváltozómat nem deklaráltam. Az első gondolatom az volt mikor ránéztem a ciklusra, 
+            hogy lőtte fogom deklarálni a változót majd ezután sikerült feltölteni a programot ami tökéletesen futott.
+        </para>
+        <para>
+            A képen 2 terminált tettem egymásra, hogy láthassunk, C89-cel nem fordul ellenben C99-cel igen. Ahhoz hogy különböző szabványokkal fordítsunk 
+            használjuk a következő kifejezést: <screen>gcc vd.c -o vd -std=c89</screen>
+        </para>
+
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/cstandard.png" format="PNG" scale="50" />
+            </imageobject>
+        </mediaobject> 
+        
+    </section>                     
+
+    <section>
+        <title>Saját lexikális elemző</title>
+        <para>
+            Írj olyan programot, ami számolja a bemenetén megjelenő valós számokat! 
+            Nem elfogadható olyan megoldás, amely maga olvassa betűnként a bemenetet, 
+            a feladat lényege, hogy lexert használjunk, azaz óriások vállán álljunk és ne kispályázzunk!
+        </para>
+        <para>
+            A lexer programok speciális szöveg elemző programok amivel szövegeket lehet tetszőleges szempontból elemezni
+            illetve átalakítani. Ha még nem találkoztunk ilyenekkel akkor teleíptsük a függőségeit az alábbi módok valamelyikével:
+            <screen>sudo apt-get install flex-dev</screen>
+            <screen>sudo apt-get install flex-old</screen>
+            <screen>sudo apt install flex</screen>
+        </para>
+        <para>
+            A példaprogramunk lényege, hogy valós számokat keres a beadott szövegben, majd a szöveget átalakítva visszaadja. 
+            Ha az input pl.: "2teszt344lexer0.7" akkor azt kapjuk vissza hogy: "[realnum=2 2.000000]teszt[realnum=344 344.000000]lexer[realnum=0.7 0.700000]". 
+            Tehát elemzi és át is alakítja a szöveget.
+        </para>
+        <para>
+            A program maga három fő részre bontható amelyeket a "%%" kifejezések választanak el egymástól, eszerint fogom 
+            tagolni és elemezni is a kódot. Nézzük az első részét.
+        </para>
+        <programlisting language="c"><![CDATA[
+        %{
+        #include <stdio.h>
+        int realnumbers = 0;
+        %}
+        digit	[0-9]]]></programlisting>
+
+        <para>
+            Az első részben meghívjuk a szükséges header fájlt illetve deklaráljuk a <command>realnumbers</command> változót, 
+            ami számolja, hogy hány valós számot találtunk a szövegben.
+        </para>
+        <programlisting language="c"><![CDATA[
+        %%
+        {digit}*(\.{digit}+)?	{++realnumbers; 
+        printf("[realnum=%s %f]", yytext, atof(yytext));}
+        ]]></programlisting>
+        <para>
+            Az második részben alkotjuk meg a szövegelemzés szabályait. Olyan számokat keresünk amelyek vagy tetszőleges számjegyből állnak 
+            vagy tetszőleges számjegyből 1 db pontból amit újabb tetszőleges számjegy követ. Ezután ha már megadtuk milyen mintára reagáljon a 
+            program definiáljuk, hogy hogyan reagáljon rá, azaz hogyan alakítsa át a szöveget, ezért a <command>printf()</command> függvény felel.
+        </para>
+        
+       <programlisting language="c"><![CDATA[
+        %%
+        int
+        main ()
+        {
+        yylex ();
+        printf("The number of real numbers is %d\n", realnumbers);
+        return 0;
+        }
+        ]]></programlisting>
+        <para>
+            Az utolsó rész a fő programot tartalmazza, itt meghívjuk a lexert a <command>yylex ()</command> függvénnyel és 
+            egy kiíratást találunk ami a talált valós számok számát tartalamzó változó értékét írja ki. Viszont nézzük meg hogy néz ki 
+            amikor lefut a program!
+        </para>
+        <para>
+            A fordításhoz először használjuk a következő parancsokat:<screen>lex -o realnumber.c realnumber.l</screen>
+            <screen>gcc realnumber.c -o realnumber -lfl</screen>
+            ekkora elkészült a futtatható állományunk.
+        </para>
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/unaris.jpg" format="JPG" scale="60" />
+            </imageobject>
+        </mediaobject>
+        <para>
+            Megoldás forrása: <link xlink:href="Chomsky/realnumber.l">
+                <filename>bhax/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/Chomsky/realnumber.l</filename>
+            </link> 
+        </para>
+    </section>                     
+
+    <section>
+        <title>Leetspeak</title>
+        <para>
+            Lexelj össze egy l33t ciphert!
+        </para>
+        <para>
+            Az előzöh hasonlóan az ebben a feladatban tárgyalt pédaprogram is egy lexer program, tehát szövegelemzésre és 
+            szövegek átalakítására szolgál. Ha az olvasó jártas az internet világában biztosan találkozott már azzal a jelenséggel, 
+            hogy betűket számokra cserélnek, ez gyakori például felhasználó nevek esetén, kapóra jön mivel lehet a kiválaszott név 
+            már foglalt viszont ha bizonyos karaktereket kinézetre hasonlóakra cserélünk nagyobb eséllyel szabad felhasználó nevet 
+            hozunk létre. Viszont korábban nem ilyen egyszerű dolgokra használták ezt a technikát ugyanis ez a titkosítás egyik 
+            kedvelt eszköze volt, ha így írunk le dolgokat a konkrét szavakra rákereső program a behelyettetsített számok 
+            miatt egy-egy kifejezést nem tud értelmezni, elsiklik fölötte. Napjainkban szerveren való játék során is gyakran írnak 
+            így, hogy a sértő kifejezések miatt ne bannolják az illetőt.
+        </para>
+        <para>
+            A program maga úgy működik, hogy az angol ABC minden betűjéhez és minden számjegyhez tartozik 4 db ASCII karakter, tehát 
+            adott karakterhez társíthatunk betűt, számot vagy speciális karaktereket, a lényeg, hogy valamennyire hasonló legyen az eredetihez, 
+            annak érdekében, hogy az emberi szem számára még olvasható maradjon. Előfordul, hogy egy karakterhez nem lehet 4-et párosítani, 
+            hanem sak 2 hasonló van, ekkor kétszer párosítjuk az eredit egy másik karakterhez, mindenképpen egy karakternek 4 párja kell, hogy legyen.
+            Ez a program is az előzőhöz hasonlóan 3 fő részre bontható, nézzük meg melyek ezek!
+        </para>
+        <programlisting language="c"><![CDATA[%{
+        %{
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <time.h>
+  #include <ctype.h>
+
+  #define L337SIZE (sizeof l337d1c7 / sizeof (struct cipher))
+    
+  struct cipher {
+    char c;
+    char *leet[4];
+  } l337d1c7 [] = {
+
+  {'a', {"4", "4", "@", "/-\\"}},
+  {'b', {"b", "8", "|3", "|}"}},
+  {'c', {"c", "(", "<", "{"}},
+  {'d', {"d", "|)", "|]", "|}"}},
+  {'e', {"3", "3", "3", "3"}},
+  {'f', {"f", "|=", "ph", "|#"}},
+  {'g', {"g", "6", "[", "[+"}},
+  {'h', {"h", "4", "|-|", "[-]"}},
+  {'i', {"1", "1", "|", "!"}},
+  {'j', {"j", "7", "_|", "_/"}},
+  {'k', {"k", "|<", "1<", "|{"}},
+  {'l', {"l", "1", "|", "|_"}},
+  {'m', {"m", "44", "(V)", "|\\/|"}},
+  {'n', {"n", "|\\|", "/\\/", "/V"}},
+  {'o', {"0", "0", "()", "[]"}},
+  {'p', {"p", "/o", "|D", "|o"}},
+  {'q', {"q", "9", "O_", "(,)"}},
+  {'r', {"r", "12", "12", "|2"}},
+  {'s', {"s", "5", "$", "$"}},
+  {'t', {"t", "7", "7", "'|'"}},
+  {'u', {"u", "|_|", "(_)", "[_]"}},
+  {'v', {"v", "\\/", "\\/", "\\/"}},
+  {'w', {"w", "VV", "\\/\\/", "(/\\)"}},
+  {'x', {"x", "%", ")(", ")("}},
+  {'y', {"y", "", "", ""}},
+  {'z', {"z", "2", "7_", ">_"}},
+  
+  {'0', {"D", "0", "D", "0"}},
+  {'1', {"I", "I", "L", "L"}},
+  {'2', {"Z", "Z", "Z", "e"}},
+  {'3', {"E", "E", "E", "E"}},
+  {'4', {"h", "h", "A", "A"}},
+  {'5', {"S", "S", "S", "S"}},
+  {'6', {"b", "b", "G", "G"}},
+  {'7', {"T", "T", "j", "j"}},
+  {'8', {"X", "X", "X", "X"}},
+  {'9', {"g", "g", "j", "j"}}
+  
+// https://simple.wikipedia.org/wiki/Leet
+  };
+  
+%}
+        ]]></programlisting>
+
+        <para>
+            Az első részben ismét meghívjuk a szükséges header fájlokat, illetve elkészül a chiper típúsú tömb, ebben 
+            vannak összepárosítva az egyes karakterek a 4 db párjukkal. Ha figyelmesek vagyunk láthatjuk, 
+            hogy meghívjuk a time.h header-t ami majd random generáláshoz fog kelleni a kód második fő részében.
+        </para>
+
+        <programlisting language="c"><![CDATA[
+.	{
+	  
+	  int found = 0;
+	  for(int i=0; i<L337SIZE; ++i)
+	  {
+	  
+	    if(l337d1c7[i].c == tolower(*yytext))
+	    {
+	    
+	      int r = 1+(int) (100.0*rand()/(RAND_MAX+1.0));
+	    
+          if(r<91)
+	        printf("%s", l337d1c7[i].leet[0]);
+          else if(r<95)
+	        printf("%s", l337d1c7[i].leet[1]);
+	      else if(r<98)
+	        printf("%s", l337d1c7[i].leet[2]);
+	      else 
+	        printf("%s", l337d1c7[i].leet[3]);
+
+	      found = 1;
+	      break;
+	    }
+	    
+	  }
+	  
+	  if(!found)
+	     printf("%c", *yytext);	  
+	  
+	}]]></programlisting>
+        <para>
+            A program második része végzi a karakterek cseréjét. A csere egy random generáláson alapszik, ami a fő programban történik. Egy karakternek ugye 4 párja van, 
+            viszont el kell dönteni mikor melyiket helyettesítse a szövegbe, ehhez kell az 1 és 100 közötti random szám. Ha a random szám 
+            91-nél kisebb akkor az első társított karaktert fogja behelyettesíteni, erre tehát jóval nagyobb esély van mint a többire, a 
+            másodikra 4%, a harmadikea 3% az utolsóra pedig 2%. Az utolsó dolog ebben a részben a kiíratás.
+        </para>
+
+    <programlisting language="c"><![CDATA[
+%%
+int 
+main()
+{
+  srand(time(NULL)+getpid());
+  yylex();
+  return 0;
+}
+]]></programlisting>
+        <para>
+            Az utolsó rész a fő program, ismét mint az előző esetn meghívjuk a lexert a <command>yylex ()</command> függvénnyel,
+            illetve láthatjuk, hogy maga a random sorsolás itt történik.
+        </para>
+        <para>
+            Nézzük meg hogy hogyan néz ki a program lefuttatva! Ugyanúgy kell fordítani és futtatni mint az előző feladatban tárgyalt 
+            programot. Megjegyezném, hogy a program a kis és nagy betűket ugyanúgy felismeri.
+        </para>
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/unaris.jpg" format="JPG" scale="60" />
+            </imageobject>
+        </mediaobject>
+        <para>
+            Megoldás forrása: <link xlink:href="Chomsky/l337d1c7.l">
+                <filename>bhax/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/Chomsky/l337d1c7.l</filename>
+            </link>  
+        </para>
+    </section>                     
+
+
+    <section>
+        <title>A források olvasása</title>
+            
+        <para>
+            Vigyázz, sok csipet kerülendő, mert bugokat visz a kódba! Melyek ezek és miért? 
+            Ha nem megy ránézésre, elkapja valamelyiket esetleg a splint vagy a frama?
+        </para>
+        
+            
+        <itemizedlist>
+            <listitem>                                    
+                <programlisting><![CDATA[if(signal(SIGINT, SIG_IGN)!=SIG_IGN)
+    signal(SIGINT, jelkezelo);]]></programlisting>
+                <para>Akkor és csakis akkor kezelje a 'jelkezelo' függvény a SIGINT jelet, ha az eddig nem volt figyelmen kívűl hagyva.
+                    Amennyiben figyelmen kívűl van hagyva nem tudunk kilépni Crtl+C-vel a programból.</para>
+            </listitem>
+            <listitem>
+                <programlisting><![CDATA[for(i=0; i<5; ++i)]]></programlisting>
+                <para>Egy for ciklus ami a négyszer hajtja végre a hozzá rendelt utasításokat. Preorder módon először az i-t növeli és csak
+                    aztán végzi el az utasításokat. 
+                </para>
+            </listitem>
+            <listitem>                                    
+                <programlisting><![CDATA[for(i=0; i<5; i++)]]></programlisting>
+                <para>
+                    Egy for ciklus ami a ötször hajtja végre a hozzá rendelt utasításokat. Postorder módon először elvégzi az 
+                    utasításokat és csak azután növeli az i-t. Ugyanazt csinálja gyakorlatilag mint az előző ciklus.
+                </para>     
+            </listitem>
+            <listitem>
+                <programlisting><![CDATA[for(i=0; i<5; tomb[i] = i++)]]></programlisting>
+                <para>
+                    Egy for ciklus ami a ötször hajtja végre a hozzá rendelt utasításokat és a tomb[] első öt értékét 
+                    lecseréli az aktuális i értékre azaz a tömb első 5 eleme 0, 1, 2, 3, 4 lesznek.
+                </para>
+            </listitem>
+            <listitem>                                    
+                <programlisting><![CDATA[for(i=0; i<n && (*d++ = *s++); ++i)]]></programlisting> 
+                <para>Ebben az esetben egy for ciklusunk van aminek 2 feltétele lenne viszont a második igazából nem 
+                    feltétel hanem utasítás, ezért hibás.</para>         
+            </listitem>
+            <listitem>
+                <programlisting><![CDATA[printf("%d %d", f(a, ++a), f(++a, a));]]></programlisting>
+                <para>A standard outputra kiíratjuk az f() függvény visszatérési értékét, decimális számban. </para>    
+            </listitem>
+            <listitem>                                    
+                <programlisting><![CDATA[printf("%d %d", f(a), a);]]></programlisting>
+                <para>A standard outputra kiíratjuk az f() függvény visszatérési értékét 'a'-ra és magát az 'a'-t is, decimális számban.</para>      
+            </listitem>
+            <listitem>
+                <programlisting><![CDATA[printf("%d %d", f(&a), a);]]></programlisting> 
+                <para>A standard outputra kiiratjuk az f() függvény visszatérési értékét 'a'-ra, aminek a memóriacímére mutat a mutaó
+                    és magát az 'a'-t is, decimális számban.
+                </para>
+            </listitem>
+        </itemizedlist>
+        
+        <para>
+            Megoldás videó: 
+        </para>
+
+        <para>
+            Tanulságok, tapasztalatok, magyarázat...
+        </para>
+
+    </section>                     
+
+    <section>
+        <title>Logikus</title>
+        <para>
+            Hogyan olvasod természetes nyelven az alábbi Ar nyelvű formulákat?
+        </para>
+        <para>
+            Az előző félév során megismerkedhettem az ítéletlogika illetve az elsőrendű logikai nyelvekkel.
+            Az elsőrendű logikai nyelvek között találhatunk nevezetes diszciplínákat, ilyen az Ar azaz az elemi aritmtikát 
+            leíró elsőrendű logikai nyelv vagy a Geom, vagyis az elemi geometriát leíró logikai nyelv.
+        </para>
+        <para>
+            Ahogy említettem az ar az elemi aritmetikát írja le minimális kifejezés használatával. A nyelv ABC-je csupán 
+            egy típúsú változót, egy predikátumszimbólumot, három függvényszimbólumot és egy konsatnst használ.
+            A változótípus természetes szám, a predikátum szímbulóm kétváltozós, ez az egyenlőséget fejezi ki. A függvényszmbólumok között 
+            találunk egy egyváltozósat, ez a rákövetkező függvény, a másik kettő az összeadás és a szorzás pedig kétváltozósak. A 
+            nyelv egyetlen konstansa a 0. Mindenképp érdemes megemlíteni, hogy az Ar nyelv univerzuma a 0-val kiegészült természetes számok halmaza.
+        </para>
+        <para>
+            A nyelv csekély ABC-jét viszont mindig bővíthetjük, ugyan az előbb említett Ar nyelvi szavakkal leírható az elemi aritmetika 
+            minden fogalma érdemes a nagyon összetett kifejezésekhez új jelöléseket bevezetni.
+        </para>
+        <programlisting language="tex"><![CDATA[$(\forall x \exists y ((x<y)\wedge(y \text{ prím})))$ 
+
+$(\forall x \exists y ((x<y)\wedge(y \text{ prím})\wedge(SSy \text{ prím})))$ 
+
+$(\exists y \forall x (x \text{ prím}) \supset (x<y)) $ 
+
+$(\exists y \forall x (y<x) \supset \neg (x \text{ prím}))$
+]]></programlisting>        
+        <para>
+            <itemizedlist>
+                <listitem>
+                    <para>Bármely természetes számnál létezik nála nagyobb prímszám. A prímszámok száma végtelen.</para>
+                </listitem>
+                <listitem>
+                    <para>Bármely természetes szám esetén létezik nála nagyobb olyan prímszám melynek rákövetkezőjének
+                    rákövetkezője is prím. Tehát az ikerprímek száma végtelen.</para>
+                </listitem>
+                <listitem>
+                    <para>Létezik olyan természetes szám melynél bármely prímszám kisebb. A prímszámok száma véges.</para>
+                </listitem>
+                <listitem>
+                    <para>Létezik olyan természetes szám melynél bármely nála nagyobb szám nem prím. Azaz a prímszámok száma végtelen.
+                    A harmadik és a negyedik ekvivalens formulák votak.</para>
+                </listitem>
+            </itemizedlist>
+        </para>
+
+        <para>
+            Megoldás videó: <link xlink:href="https://youtu.be/ZexiPy3ZxsA">https://youtu.be/ZexiPy3ZxsA</link>, <link xlink:href="https://youtu.be/AJSXOQFF_wk">https://youtu.be/AJSXOQFF_wk</link>
+        </para>
+    </section>                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+    <!--<section>
+        <title>3.8 Deklaráció</title>
+            
+        <para>
+            Vezesd be egy programba (forduljon le) a következőket: 
+        </para>
+
+        <itemizedlist>
+            <listitem>
+                <para>egész</para>                        
+            </listitem>
+            <listitem>
+                <para>egészre mutató mutató</para>                        
+            </listitem>
+            <listitem>
+                <para>egész referenciája</para>                        
+            </listitem>
+            <listitem>
+                <para>egészek tömbje</para>                        
+            </listitem>
+            <listitem>
+                <para>egészek tömbjének referenciája (nem az első elemé)</para>                        
+            </listitem>
+            <listitem>
+                <para>egészre mutató mutatók tömbje</para>                        
+            </listitem>
+            <listitem>
+                <para>egészre mutató mutatót visszaadó függvény</para>                        
+            </listitem>
+            <listitem>
+                <para>egészre mutató mutatót visszaadó függvényre mutató mutató</para>                        
+            </listitem>
+            <listitem>
+                <para>egészet visszaadó és két egészet kapó függvényre mutató mutatót visszaadó, egészet kapó függvény</para>                        
+            </listitem>            
+            <listitem>
+                <para>függvénymutató egy egészet visszaadó és két egészet kapó függvényre mutató mutatót visszaadó, egészet kapó függvényre</para>                        
+            </listitem>            
+        </itemizedlist>
+        
+        <programlisting language="c"><![CDATA[ int main()
+            {
+            
+                //egész
+                int num = 32;
+            
+                //egészre mutató mutató
+                int* toNum = &num;
+            
+                //egészek tömbje
+                int numArray[4] = {0,1,2,3};
+            
+                //egészek tömbjének referenciája
+                int (&numArrayRef)[4] = numArray;
+            
+                //egészre mutató mutatók tömbje
+                int* pointerArray[4];
+            
+                //egészre mutató mutatót visszaadó függvény
+                
+            
+                //egészre mutató mutatót visszaadó függvényre mutató mutató
+                
+            
+                //egészet visszaadó és két egészet kapó függvényre mutató mutatót visszaadó, egészet kapó függvény
+                
+            
+                return 0;
+            
+            }]]>
+        </programlisting>
+
+        <para>
+            Mit vezetnek be a programba a következő nevek?
+        </para>
+
+        <itemizedlist>
+            <listitem>
+                <programlisting><![CDATA[int a;]]></programlisting>            
+            </listitem>
+            <listitem>
+                <programlisting><![CDATA[int *b = &a;]]></programlisting>            
+            </listitem>
+            <listitem>
+                <programlisting><![CDATA[int &r = a;]]></programlisting>            
+            </listitem>
+            <listitem>
+                <programlisting><![CDATA[int c[5];]]></programlisting>            
+            </listitem>
+            <listitem>
+                <programlisting><![CDATA[int (&tr)[5] = c;]]></programlisting>            
+            </listitem>
+            <listitem>
+                <programlisting><![CDATA[int *d[5];]]></programlisting>            
+            </listitem>
+            <listitem>
+                <programlisting><![CDATA[int *h ();]]></programlisting>            
+            </listitem>
+            <listitem>
+                <programlisting><![CDATA[int *(*l) ();]]></programlisting>            
+            </listitem>
+            <listitem>
+                <programlisting><![CDATA[int (*v (int c)) (int a, int b)]]></programlisting>            
+            </listitem>            
+            <listitem>
+                <programlisting><![CDATA[int (*(*z) (int)) (int, int);]]></programlisting>            
+            </listitem>            
+        </itemizedlist>       
+
+
+        <para>
+            Megoldás videó: 
+        </para>
+        <para>
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        <varname>a</varname> mint egész tipusú változó.
+                    </para>
+                     
+                </listitem>
+                <listitem>
+                    <para>
+                        <varname>a</varname> memória cimére mutató mutató.
+                    </para>
+                    
+                </listitem>
+                <listitem>
+                    <para>Egy egészre mutató mutatót <varname>r</varname> névvel, ami az <varname>a</varname> értékét mint mutatócím
+                        tartalmazza.
+                    </para>
+                    
+                </listitem>
+                <listitem>
+                    <para>
+                        Öt elemű tömb, mely egészekből áll.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Egy 5 elemű, egészeket tartalmazó tömbre mutató mutató, mely a <varname>c</varname> tömbre mutat.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Öt elemű egészekre mutató mutatókból álló tömb.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Egésszel visszatérő, paraméter nélküli függvényre mutató mutató.
+                    </para>
+                </listitem>
+            </itemizedlist>  
+        </para>
+        <para>
+            Az utolsó két deklarációs példa demonstrálására két olyan kódot
+            írtunk, amelyek összahasonlítása azt mutatja meg, hogy miért 
+            érdemes a <command>typedef</command> használata: <link xlink:href="Chomsky/fptr.c">
+                <filename>bhax/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/Chomsky/fptr.c</filename>
+            </link>,
+            <link xlink:href="Chomsky/fptr2.c">
+                <filename>bhax/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/Chomsky/fptr2.c</filename>.
+            </link>  
+            
+        </para>
+        <programlisting><![CDATA[#include <stdio.h>
+
+int
+sum (int a, int b)
+{
+    return a + b;
+}
+
+int
+mul (int a, int b)
+{
+    return a * b;
+}
+
+int (*sumormul (int c)) (int a, int b)
+{
+    if (c)
+        return mul;
+    else
+        return sum;
+
+}
+
+int
+main ()
+{
+
+    int (*f) (int, int);
+
+    f = sum;
+
+    printf ("%d\n", f (2, 3));
+
+    int (*(*g) (int)) (int, int);
+
+    g = sumormul;
+
+    f = *g (42);
+
+    printf ("%d\n", f (2, 3));
+
+    return 0;
+}]]></programlisting>            
+        <programlisting><![CDATA[#include <stdio.h>
+
+typedef int (*F) (int, int);
+typedef int (*(*G) (int)) (int, int);
+
+int
+sum (int a, int b)
+{
+    return a + b;
+}
+
+int
+mul (int a, int b)
+{
+    return a * b;
+}
+
+F sumormul (int c)
+{
+    if (c)
+        return mul;
+    else
+        return sum;
+}
+
+int
+main ()
+{
+
+    F f = sum;
+
+    printf ("%d\n", f (2, 3));
+
+    G g = sumormul;
+
+    f = *g (42);
+
+    printf ("%d\n", f (2, 3));
+
+    return 0;
+}
+]]></programlisting>            
+        <para>
+            Tanulságok, tapasztalatok, magyarázat...
+        </para>
+    </section>-->
+    
+    <section>
+        <title>Vörös pipaxs pokol/csiga diszkrét mozgási parancsokkal</title>
+        <para>
+            A Turing feladatcsokorban hasonló feladattal találkozhattunk de ott diszkrét helyett folytonos mozgást 
+            alkalmaztunk. A két mozgás között jelentős különbségek vannak, mig folytonos mozgásnál a "move 1" parancs
+            mint kapcsoló müködik ami miatt addig mozog amig a "time.sleep()" engedi, addig diszkrét mozgásnál a 
+            "move 1" utasitásként müködik tehát 1 blokknyit mozog előre a "time.sleep()"-ben megadott idő alatt. 
+            Azt hogy csigában haladjon mi úgy oldottuk meg, hogy először az legalsó szinten lévő virágot kibányássza 
+            majd egy szinttel ugorjon fentebb és ezután kezdj el a csigát. A csigához 2 db for ciklust használtunk, a belső 
+            for ciklusban mindig az oldalnyi mozgáshoz elegendő lépésmennyiséget teszi a külső for ciklus pedig azt teszi 
+            lehetővé hogy adott szinten az adott oldalhosszot 4x tegye meg, ennek elején mindig fentebb ugrik egy szintet.
+        </para>
+        <para>
+            Aki először próbálkozik a Malmö-ben programozni, azt biztosan össze fogja zavarni, hogy 2 féle mozgást 
+            tud Steve végezni. Az előző feladatcsokor végén az abszolút mozgási parancsokkal programozott Steve-t mutattam be, 
+            most pedig a diszkrét parancsok használatát fogom. 
+        </para>
+        <para>
+            Abszolút mozgás estén például a <command>( "move 1")</command> parancs "kapcsolóként" viselkedik, tehát 
+            addig fog menni amíg azt nem mondjuk neki hogy álljon meg, azaz <command>( "move 0")</command>. Ez igazából 
+            a billentyűzetet próbálja szimulálni, így Steve úgy mozog mint amikor játszunk vele, addig megy amíg a billentyűzeten 
+            nyomjuk a gombot. Ezzel szemben diszkrét mozgás esetén a <command>( "move 1")</command> parancs azt jelenti, hogy 1 
+            egységet, a Minecraft világában egy "blokkot" haladjon előre. 
+        </para>
+        <para>
+            Ennek megértésében <link xlink:href="https://gitlab.com/nagye99/bhax/-/blob/master/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/bhax-textbook-fdl.pdf">Nagy Enikő</link> 
+            segített nekem, ő magyarázta el mi a különbség a folytonos és a diszkrét mozgás között.
+        </para>
+        <para>
+            A feladathoz készített megoldás, egy összetettebb program, ezt a programot a könyvben más fejezetekben is megtalálható, 
+            viszont ott más szemszögből fogjuk vizsgálni. A program úgy működik, hogy Steve felszalad a láváig, majd vissza, ezután az aréna 
+            aljából elindul csiga mozgással felfelá, a kód ezen részét mutatom be.
+        </para>
+        <para>
+            <link xlink:href="https://www.shorturl.at/uBCGT">Python verzió</link>
+        </para>
+        <programlisting><![CDATA[
+        if poppy == 1: 
+                for i in range(4):
+                    self.agent_host.sendCommand( "turn 1" )
+                    time.sleep(.1)
+                    for j in range(move):
+                        
+                        if world_state.number_of_observations_since_last_state != 0:
+                                
+                            sensations = world_state.observations[-1].text
+                            print("    sensations: ", sensations)                
+                            observations = json.loads(sensations)
+                            nbr3x3x3 = observations.get("nbr3x3", 0)
+                            print("    3x3x3 neighborhood of Steve: ", nbr3x3x3)
+                                
+                            if "Yaw" in observations:
+                                self.yaw = int(observations["Yaw"])
+                            if "Pitch" in observations:
+                                self.pitch = int(observations["Pitch"])
+                            if "XPos" in observations:
+                                self.x = int(observations["XPos"])
+                            if "ZPos" in observations:
+                                self.z = int(observations["ZPos"])        
+                            if "YPos" in observations:
+                                self.y = int(observations["YPos"])  
+                                
+                            print("    Steve's Coords: ", self.x, self.y, self.z)        
+                            print("    Steve's Yaw: ", self.yaw)        
+                            print("    Steve's Pitch: ", self.pitch)
+
+                            if "LineOfSight" in observations:
+                                LineOfSight = observations["LineOfSight"]
+                                self.lookingat = LineOfSight["type"]
+                            print("    Steve's <): ", self.lookingat)
+
+                
+                        
+
+                            if nbr3x3x3[12] == "red_flower" or nbr3x3x3[13] == "red_flower" or nbr3x3x3[14] == "red_flower":
+                                if nbr3x3x3[13] == "red_flower":
+                                    self.agent_host.sendCommand( "move -1" )
+                                    time.sleep(.1) #.5
+                                if nbr3x3x3[14] == "red_flower":
+                                    self.agent_host.sendCommand( "move 0" )
+                                time.sleep(.5) #.5
+                                self.agent_host.sendCommand( "look 1" )
+                                #self.agent_host.sendCommand( "look .5" )
+                                self.agent_host.sendCommand( "move 0" )
+                                time.sleep(.5) #.5
+                                self.agent_host.sendCommand( "attack 1" )
+                                time.sleep(.5) #1
+                                self.agent_host.sendCommand( "look -.5" )
+                                #self.agent_host.sendCommand( "look -1" )
+                                self.agent_host.sendCommand( "jumpmove 1" )
+                                time.sleep(0.5)
+                            
+
+                        world_state = self.agent_host.getWorldState()
+                        
+                        if self.lookingat == "red_flower": #itt talalkozik a viraggal meg fel is veszi
+                            print("     VIRAAAG!")
+                            '''self.agent_host.sendCommand( "move 1" )
+                            time.sleep(.5)
+                            self.agent_host.sendCommand( "look 1" )
+                            self.agent_host.sendCommand( "move 0" )
+                            time.sleep(1.5)
+                            self.agent_host.sendCommand( "attack 1" )
+                            time.sleep(1.5)
+                            self.agent_host.sendCommand( "look -1" )
+                            self.agent_host.sendCommand( "jumpmove 1" )
+                            time.sleep(1)
+                        '''
+                        #innen kezdodik a mozgasa
+                        self.agent_host.sendCommand( "move 1" )
+                        time.sleep(0.1)
+
+                    world_state = self.agent_host.getWorldState()
+
+                self.agent_host.sendCommand( "jumpmove 1" )
+                time.sleep(0.5)
+                self.agent_host.sendCommand( "move 1" )
+                time.sleep(0.1)
+                move = move + 4 
+
+]]></programlisting>             
+    </section>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+</chapter>                

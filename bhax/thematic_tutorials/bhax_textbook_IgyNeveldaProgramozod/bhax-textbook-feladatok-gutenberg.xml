@@ -1,0 +1,179 @@
+<chapter xmlns="http://docbook.org/ns/docbook"
+xmlns:xlink="http://www.w3.org/1999/xlink"
+xmlns:xi="http://www.w3.org/2001/XInclude" 
+version="5.0" 
+xml:lang="hu">
+
+<info>
+        <title>Hello, Gutenberg!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+
+    <section>
+        <title>10.1. Programozási alapfogalmak</title>
+        <para>
+            A programozási nyelveknek alapvetőleg 3 szintjét tudjuk megkülönböztetni: gépi nyelv, assemly szintü nyelv
+            és a magas programozási nyelvek.
+            A gépi  nyelv jelentősége az hogy a CPU-k saját gépi nyelvvel rendelkeznek és csak az azon a nyelven irt
+            programokat tudják futtatni. Kezdő programozók tapasztalhatnak olyat ha pl .c kiterjesztésü fájlt 
+            próbénak futattni hogy szintaktikai hibát dob vissza mondjuk zárójel használatra, pontosan ezért van szükség
+            forditóprogramokra. Én linuxot használok igy mondjuk gcc prog.c -o prog paranccsl tudom előállitani a 
+            forráskódomból a futtatható tárgyprogramot. Amikor ezt tesszük a forditóprogram előszor egy lexikális elemzést
+            hajt végre majd ezt követően szintaktikai és szemantikai elemzést és az utolsó lépésben kódot generál.
+            Ezzel szemben az interpretens technika az utolsó lépést kihagyja és soronként elemzi és hajtja végre a 
+            megadott lépéseket, ilyen technikával tudunk futtatni Python nyelven irt programokat.
+            Assemly szintü nyelv: ezekről a köny csak emlités szintjén ir, ezek a nyelvek a gépi kód és a magas szintü
+            programozási nyelvek közti átmenetet képviselik.
+            Magas szintü programozási nyelvek:
+
+        </para>
+    </section>
+    <section>
+        <title>Keringhan.Ritchie: A C programozási nyelv</title>
+        <para>
+            Az első Alapismeretek c. fejezetet olvastam el. Mivel én már korábban is olvastam  a könyvből, illetve
+            főleg példaprogramokon keresztül mutatja be a programozás alapjait, ezért számomra viszonylag kevés új dolog 
+            volt benne főleg emlités szintjén számolok be az olvasott témákról.
+        </para>
+        <para>
+            Először egy klasszikus Hello Word! (A könyvben "Figyelem emberek!") program bemutatásával foglalkozik a könyv
+            és vázolja is mire van szükségünk ahhoz hogy ezt futattni tudjuk, itt megemliti, hogy valamilyen környezetben 
+            irjuk meg a forráskódot, az elengedhetetlen forditást is emliti iiletve hogy ki kell találnunk, hogy a szöveget
+            milyen képernyőn szeretnénk kiirva látni. Megjegyzem Linuxban mindezt terminálból végrehajthatjuk, pl a nano 
+            szövegszerkesztő környezetben illetve a beépitett gcc-ven tudunk is forditani.
+            Bemutatásra kerül a jól ismert "main()" függvény, amibe a fő programunk kerül. 
+        </para>
+        <para>
+            A következő pontban a váltotók kerülnek teritékre és azok deklarálása, ugye C-ben meg kell adnunk milyen tipusú
+            változót szeretnénk létrehozni viszont ekkor még nem szükséges neki kezdőértéket adni mint Pythonban, ilyenkor
+            változó tartalma gyakorlatilag memóriaszemét. A különböző tipusú változók (a példában int és float) használatát 
+            és a while ciklus müködését a köny egy Clesius-Farenheight váltóprogramon keresztül mutatja be, illetve a változó
+            tipusokra való hivatkozás módját is szemlálteti (printf() függvény használata).Ugyanezena példán keresztül 
+            bemutatja a for ciklus müködését és szintaxisát is, hogy az olvasó láthassa ugyanúgy célra vezető lehet
+            midnkét ciklus használata, viszont itt fontos megjegyezni, hogy probléma specifikus mikor melyiket érdemes 
+            használni. Ezen kivül megemliti a könyv a szmbolikus állandókat melyekkel bizonyos objektumokra hivatkozhatunk 
+            a "#define" kifejezés segitségével.
+
+        </para>
+        <para>
+            A következő pont a karakterek ki és bevitelével foglalkozik a "getchar()" és "putchar()" függvények bemutatásán
+            keresztül. A könyv is kiemeli, hogy ezeket a müveleteket a "printf()" és "scanf()" függvényekkel is
+            megtehetjük, az hogy melyeket használjuk megint probéla specifikus. Ebben a bekezdésben szó esik az ASCII 
+            karakterkészletről is. a megoldandó példaprogram itta  a különböző karakterek megszámlálásáról szól az előző
+            témakörben tárgyalt ciklusok segitségével. A következő példaprogram bemenetre érkező szavak számlálását 
+            várja el, a szavakat szóköz választja el és az adott szavak első karakterét kell felismernie a kész programozóknak
+            ez alapján annyi szót számol ahány szókezdő karaktert talál. Ekkor felmerül az elágazás kérdése is.
+            A könyv bemutatja az if/else szintaxisát és az "andandhelye" azaz "és", illetve a "||" azaz "vagy" operátor müködését,
+            amik elengedhetetlenek a különböző feltételek pontos megfogalmazásához.
+        </para>
+        <para>
+            A karakterek témaköre utána  könyv a tömböket taglalja, ezeket C-ben szerintem egyszerü kezelni, szerencsére a
+            számozásuk is 0-ról indul mint általában a magasabb szintü programozási nyelveknél megszokott. Fontosnak tartom 
+            megjegyezni hogy C-ben a stringek leirására gyakran a karaktertömbök használata a megoldás ami furcsa lehet annak
+            aki korábban mondjuk C++-ban programozott. 
+        </para>
+        <para>
+            Az utolsó témakör a függvények meghivásával, paraméterinek megadásáról és általános használatukról szól.
+            Le van irva hogyan tudunk visszatérésé értékekkel pontosan dolgozni, egyik függvényét átadni másik függvénynek,
+            általános hazsnálatukat a könyv jól szemlélteti.
+        </para>
+        <para>
+            Összefogalalásva: Az Alapismeretek c. fejezet valóban a legelemibb szinten mutatja be a C nyelv használatát
+            Az olvasás során felmerülő témák majdnem mindegyékével találkoztam már korábban. Kezdő programozóknak 
+            ajánlanám, én is mikor elkezdtem C nyelven programozni ezt a könyvet kezdtem el olvasgatni és valóban hasznos
+            is volt.
+        </para>
+    </section>
+    <section>
+        <title>10.4. Python bevezetés</title>
+        <para>
+            A Python programozási nyelv, amely 2018-ra a legnépszerübb programozási nyelvvé vált, Guido van Rossum nevéhez
+            füződik aki azt 1990-ben alkotta meg. A kezdő programozóknak a python ideális nyelv számos előnye maitt, 
+            viszonylag könnyen elsajátitható, objektum orientált és platformfüggetlen is. A python olyan magas szintü
+            prograozási nyelv amely jobban hasonlit a természetes angol nyelvhez mint a többi magas szintü programozási nyelv,
+            tömör, jól olvasható kódokat irhatunk és nincs szükség zárójelezésre sem.
+            Fontos megjegyezni hogy alkalmazásfejlesztéshez is ideális, gyorsabban lehet fele dolgozni mint pl a C/C++ esetében
+            mivel itt kimarad a forditási fázis. A forráskódot az interpreternek köszönhetően azonnal futatthatjuk és
+            lényegesen gyorsabbá válik a programozási folyamat.
+        </para>
+        <para>
+            SZINTAXIS: Ha már a python nyelvről irok, fontos megemliteni a szintaxist. A nyelv szintaktikájának egyik 
+            legfontosabb tulajdonsága hogy behúzás alapú. Pl.: ha irunk egy for ciklust a ciklusban lévő állitások
+            egy behúzással (tab = 4 szóköz) benteb vannak mint a for ciklus feje. Erre emiatt a nyelv nagyon érzékeny is, 
+            ha nem megfelelően vannak a behúzásaink elrendezve egyből kapunk hibeüzenetet. 
+            A C/C++ nyelvekhez képest, amelyeket én is használtam korábban, talán a legszembetünőbb külonbség a ";" hiánya,
+            illetve a ciklusok és függvények után kapcsos zárójelek helyett használatos ":". Ha kommentelni szeretnénk
+            akkor tudunk soronként a "#"-el vagy több sort 3 db aposztróffal melyeket a komment elejére és végére kell
+            illesztenünk.
+        </para>
+        <para>
+            A könyvben olvashattam a tipusokról és változókról. Ebben a programozási nyelvben is a szokásos tipusokat
+            tudjuk használni (számok, azon belül eglszek tizedes/lebegőpontos törtek, stringek stb.) viszont jelentős különbség,
+            hogy a váltózóinkat nem kell deklarálnunk, futás közben az interpreter a egadott kezdőérték alapján felismeri
+            milyen tipusu változóval van dolga.
+            Véltozók alatt az egyes objektumokra mutató refernciákat értjük. Vannak lokális és globális változók. Ha az adott
+            egy függvényben vesszük fel akkor lokális változóról beszélünk, ha globálissá szeretnén tenni a függvény elején
+            a változó felvételekor használnunk kell a "global" kulcsszót. Különböző változótipusok között szabad a konverzió, 
+            tehát tudunk stringől számot képezni stb. Szerencsére a nyelv sok beépitett függvényt tartalmaz igy a változóinkat
+            könnyen tudjuk kezelni. A tömbök számozása 0-tól kezdődik.
+        </para>
+        <para>
+            Fontos megemliteni a nyelv eszközeit. Az első az elágazás, itt is a jól ismert if/elif/else kulccsszavakat használjuk,
+            müködését tekintve olyan mint bármely más programozási nyelvben, a szitaxisában pedig a kettőspont használata az ami 
+            eltérést mutat más nyelvekhez képest. A ciklusoknál hasonló a helyzet, a while ciklusnál is a feltltel mögötti kettőspontot
+            használjuk a kapcsos zárójelek helyett. Eltérés a for ciklusban van leginkébb ugyanis annak 2 fajtájával találkozhatunk. Az
+            első a megszokott for ciklus, szintaxist illetően eltér de ezen kivül nincs különbség. A második fajta for cilus a 
+            "range()" függvényt használja, mely futtatása alattt egy listát ad vissza.
+            A függvényeinkhez a "def" kulcsszót használhatjuk de itt is lányegbeli eltérést nem igazán tapasztalhatunk.
+            Amikor az osztélyokról és objektumokról olvastam láttam magam előtt a "Class Steve:"-et és annak attribútumait. 
+            Mivel én korábban nem találkoztam objektum orientált programozással a gyakorlatban ezt még mindig tanulom és próbálom
+            a gyakorlatba beépiteni de mindenképp hasznos volt olvasnom erről is a könyvben. 
+        </para>
+    </section>
+    <section>
+    <title>10.2. Szoftverfejlesztés C++ nyelven</title>
+        <para>
+            A C++ egy magas szintü programozási nyelv általános célú frlhasználásra. Az első verziója 1983-ban jelent meg.
+            jelentős külonbség elődjéhez, a Chez klpest, hogy a C++ objektum orientált.  C-hez nagyon közel áll, egy C++
+            forditó jó eséllyel tudja a C-t is forditani, hiába vannak benne pl C kulccsszavak vagy éppen C header fájlok.
+            A 2-6. oldalon a C nyelvhez képesti továbbfejlesztésről olvashatunk, meg is emliti a könyv hogy az itt 
+            bemutatott kódokat már csak C++ forditóval fordulnak.
+        </para>
+        <para>
+            Először a függvények ekrülnek megemlitésre. A C nyevben egy üres paraméterlistájú  függvényt tetszőleges számú
+            paraméterrel hivhatunk meg, mig C++-ban az üres paraméterlistára a "void" kifejezés utal. Ezen kivül jelentős 
+            különbség, hogy ha nem diniálun k visszatérési értéket C-ben alapértelmezettként int tipusú visszatérési értéket
+            kapunk vissza mig C++-ban forditási hibát. A "main()" függvény estén nem kötelező a return utasitást használni
+            mivel ha a kód sikeresen a fordul annak visszatérési értéke mindenképp 0 lesz. 
+        </para>
+        <para>
+            A bool tipust szükségszerü kiemelnem. Fontos különbség a két nyelv között, hogy C++-ban van bool tipusú változó
+            amely "true" azaz igaz vagy "false" azaz hamis logikai értékkel rendelkezhet. C nyelvben ezt a logikai értéket
+            int tipussal tudjuk kifejezni ami lehet 0 vagy 1. 
+        </para>
+        <para>
+            A C-ben és a C++-ban is lehet használni több bájtos stringeket, A C++-szal ellentétben ami 
+            rednelkezik ezek kezeléséhez szükséges függvényekkel, C-ben ahhoz hogy a wchar_t tpiust tudjuk használni
+            meg kell hivnunk vagy az stdlib.h, a z stddef.h vagy a wchar.h header fájlokat.
+        </para>
+        <para>
+            C++-ban mindenhol lehet változókat deklarálni ahol utasitást tudunk megadni. Ez azért hasznos mert ott 
+            tudjuk deklarálni ahol használni szeretnénk igy átláthatóbb lesz a kódunk és kisebb eséllyel feledkezünk
+            meg a változóinkról.
+            Pl.: ha egy for ciklust irunk annak fejében tudjuk deklarálni a ciklusváltozót, ekkor annak csak a 
+            ciklus törzsére lesz hatása.
+        </para>
+        <para>
+            A forditás, futattás, nyomonkövetésről:
+            Ez a bekezdés a könyvben számomra nem volt túl hasznos mivel itt a fejlesztői környezet forditásra és
+            futtatásra való felhasználása volt kifejve, ráadásul mint exe fájl Windows alatt. Én általában Linux
+            rendszert használok és az elmentett .c vagy .cpp kiterjesztésü fájljaimat a rendszerbe beépietett gcc 
+            és g++ forditókkal tudom forditani terminálon keresztül, tehát a hibaüzenetek is a terminál 
+            képernyőjén jelennek meg. Egy helyen tudom a sikeres forditás után futtatni a kész futattható állományaimat.
+            Szerintem ezzel a módszerrel forditani mint ahogy az a könyvben van bemutatva de persze érdemes ismerni
+            mindkét módszert.
+        </para>
+    </section>   
+</chapter>

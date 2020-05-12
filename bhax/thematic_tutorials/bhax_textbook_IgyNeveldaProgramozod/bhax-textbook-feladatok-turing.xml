@@ -1,0 +1,1322 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+
+    <info>
+        <title>Helló, Turing!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+    <section>
+        <title>Végtelen ciklus</title>
+        <tip>
+              <title>tip</title>
+              <para>
+                  ikon próba
+              </para>            
+            </tip> 
+
+        <warning>
+              <title>warning</title>
+              <para>
+                  ikon próba
+              </para>            
+            </warning> 
+        <caution>
+              <title>caution</title>
+              <para>
+                  ikon próba
+              </para>            
+        </caution> 
+
+        <para>
+            Írj olyan C végtelen ciklusokat, amelyek 0 illetve 100 százalékban dolgoztatnak egy magot és egy olyat, amely  
+            100 százalékban minden magot!
+        </para>
+        <para>
+            Megoldás videó: <link xlink:href="https://youtu.be/lvmi6tyz-nI">https://youtu.be/lvmi6tyz-nI</link>
+        </para>
+        <para>
+            Megoldás forrása: <link xlink:href="Turing/infty-f.c">
+                <filename>bhax/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/Turing/infty-f.c</filename>
+            </link>, 
+            <link xlink:href="Turing/infty-w.c">
+                <filename>bhax/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/Turing/infty-w.c</filename>
+            </link>.
+        </para>
+        <para>
+            Számos módon hozhatunk és hozunk létre végtelen ciklusokat. 
+            Vannak esetek, amikor ez a célunk, például egy szerverfolyamat fusson folyamatosan és van amikor egy
+            bug, mert ott lesz végtelen ciklus, ahol nem akartunk. Saját péláinkban ilyen amikor a PageRank algoritmus
+            rázza az 1 liter vizet az internetben, de az iteráció csak nem akar konvergálni...
+        </para>
+        <para>
+            A végtelen ciklusok létjogosultsága eksőre kicsit meglepő lehet a kezdő programozóknak, miért is akarnánk, 
+            hogy egy program ne álljon le? Pedig egyébként sokszor nagyon hasznosak. Én egyébként szoktam gyerekekkel 
+            foglalkozni, és már velük is volt szó végtelen ciklusokról. A Microsoft Kodu-ban dolgozunk általában, 
+            átlag 6 éves korosztállyal és egy akadálypályás játékot kellett készítenünk. A cél az volt, hogy a karakterünkkel 
+            át kelljen kelni a szemben oda-vissza mozgó biciklisek között. A biciklisek kódja volt itt a kérdéses, megadott 
+            útvonalon kellett oda-vissza haladiuk addig amíg a játék tart. A kulcsó itt amíg a játék tart, persze nem 
+            olyan végtelen ciklusról volt szó amivel mi foglalkozunk, de szerintem ez a példa szemléletes. Tehát el kellett 
+            érünk, hogy a biciklisek ne hagyják abba mozgásukat. A gyerekekkel ezt a feladatot úgy oldottuk meg, hogy a 
+            feltétel megalkotásához 2 blokkot használtunk fel, az egyik a "lát" a másik pedig a "bármi". Tehát ameddig 
+            akármit lát a biciklis mozogni fog az útvonalán, és ugye valamit az adott környezetben mindig lát tehát 
+            nem fog a cilusból kilépni. Egyébként a képen látszik, hogy itt "ha" feltételeket szabunk, de a labdapattogtatós 
+            feladatban majd láthatjuk milyen egyszerű ezekből ciklust készíteni.   
+        </para>  
+
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/kodu.png" format="PNG" scale="50" />
+            </imageobject>
+        </mediaobject> 
+
+        <para>
+            Egy mag 100 százalékban:               
+        </para>
+        <programlisting language="c"><![CDATA[int
+main ()
+{
+  for (;;);
+
+  return 0;
+}
+]]>
+        </programlisting>        
+        <para>        
+        vagy az olvashatóbb, de a programozók és fordítók (szabványok) között kevésbé hordozható
+        </para>
+        <programlisting language="c"><![CDATA[int
+#include <stdbool.h>
+main ()
+{
+  while(true);
+
+  return 0;
+}
+]]>
+        </programlisting>   
+
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/1mag100.png" format="PNG" scale="35" />
+            </imageobject>
+        </mediaobject> 
+
+        <para>
+            Az első végtelen ciklus egy processzor magot használ 100%-ban.
+            Ez úgy lehetséges hogy itt egy while ciklust használunk ami folyamatosan 
+            vizsgálja a megadott feltételt, ehhez 1 CPU magot használ viszont annak a teljes 
+            teljesitményét muszáj kihasználnia hogy folyamatosan figyelje a ciklus feltételét.
+            Ugyanez a helyzet igazából egy végtelen for ciklus esetén is, megjegyezném, hogy az assembly 
+            kódjuk megegyezik. 
+            <!--for és while összehasonlitása-->
+        </para>
+
+        <para>
+            Azért érdemes a <literal>for(;;)</literal> hagyományos formát használni, 
+            mert ez minden C szabvánnyal lefordul, másrészt
+            a többi programozó azonnal látja, hogy az a végtelen ciklus szándékunk szerint végtelen és nem szoftverhiba. 
+            Mert ugye, ha a <literal>while</literal>-al trükközünk egy nem triviális 
+            <literal>1</literal> vagy <literal>true</literal> feltétellel, akkor ott egy másik, a forrást
+            olvasó programozó nem látja azonnal a szándékunkat.
+        </para>            
+        <para>
+            Egyébként a fordító a <literal>for</literal>-os és 
+            <literal>while</literal>-os ciklusból ugyanazt az assembly kódot fordítja:
+        </para>            
+        <screen><![CDATA[$ gcc -S -o infty-f.S infty-f.c 
+$ gcc -S -o infty-w.S infty-w.c 
+$ diff infty-w.S infty-f.S 
+1c1
+< 	.file	"infty-w.c"
+---
+> 	.file	"infty-f.c"
+]]></screen>  
+        <para>
+            Egy mag 0 százalékban:               
+        </para>       
+
+        <para>
+            A második ciklus egy  cpu magot közel 0%-ban használ. Ehhez használtunk egy for ciklust,  
+            alapvetőleg mindkettő 1 magot használ 100%-ban.  Ahhoz hogy a cpu mag  0%-ot használjon 
+            használnunk kell a sleep(1) függvényt ami a számolást késlelteti ezért CPU rá van kényszerülve 
+            a késleltetésre, viszont így sem tudjuk elérni hogy pontosan 0%-on menjen, inkább közelit a 0-hoz, 
+            a gyakorlat azt mutatja hogy így kb 1%-on megy. A képen egyébként ha megnézzük, az 5. CPU 
+            magnál látunk egy 0.0 értéket, tehát hozzá került a kérdéses ciklus.
+        </para>
+       
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/egymag0.png" format="PNG" scale="35" />
+            </imageobject>
+        </mediaobject> 
+        
+        <programlisting language="c"><![CDATA[#include <unistd.h>
+int
+main ()
+{
+  for (;;)
+    sleep(1);
+    
+  return 0;
+}
+]]>
+        </programlisting>        
+        <para>
+            Minden mag 100 százalékban:               
+        </para>
+
+         <para>
+            A harmadik ciklusunk minden cpu magot 100%-osan használ. Ehhez szükségünk van egy for ciklusra és 
+            az omp.h nevű fájlra. Ennek segítségével párhuzamosan engedi használni egy feladatra a processzunk
+            minden magját. Alapvetőleg ha egy ilyyen ciklust futtatunk egy magot használ ki 100%-ban, a tesztjeim
+            során azt vettem észre, hogy éppen melyik magot használja az váltakozhat. Fordítani és futtatni egyébként
+             a következőképpen tudjuk ezt a programot: <screen>gcc -fopenmp filenev.c -o fajlnev</screen>.
+        </para>
+
+        <para>
+            Nos így néz ki ha lefutott. Nagyon kíváncsi voltam egyébként ennek a programnak a futására, mivel 2 CPU-t használok
+            és érdekelt hogy így is működik-e dolog, viszont ahogy láthatjuk működött.              
+        </para>
+
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/minden100.png" format="PNG" scale="35" />
+            </imageobject>
+        </mediaobject> 
+
+        <programlisting language="c"><![CDATA[#include <omp.h>
+int
+main ()
+{
+#pragma omp parallel
+{
+  for (;;);
+}
+  return 0;
+}
+]]>
+        </programlisting>        
+        <para>
+            A <command>gcc infty-f.c -o infty-f -fopenmp</command> parancssorral készítve a futtathatót, majd futtatva,               
+            közben egy másik terminálban a <command>top</command> parancsot kiadva tanulmányozzuk, mennyi CPU-t használunk:            
+        </para>
+        <screen><![CDATA[top - 20:09:06 up  3:35,  1 user,  load average: 5,68, 2,91, 1,38
+Tasks: 329 total,   2 running, 256 sleeping,   0 stopped,   1 zombie
+%Cpu0 :100,0 us, 0,0 sy, 0,0 ni, 0,0 id, 0,0 wa, 0,0 hi, 0,0 si, 0,0 st
+%Cpu1 : 99,7 us, 0,3 sy, 0,0 ni, 0,0 id, 0,0 wa, 0,0 hi, 0,0 si, 0,0 st
+%Cpu2 :100,0 us, 0,0 sy, 0,0 ni, 0,0 id, 0,0 wa, 0,0 hi, 0,0 si, 0,0 st
+%Cpu3 : 99,7 us, 0,3 sy, 0,0 ni, 0,0 id, 0,0 wa, 0,0 hi, 0,0 si, 0,0 st
+%Cpu4 :100,0 us, 0,0 sy, 0,0 ni, 0,0 id, 0,0 wa, 0,0 hi, 0,0 si, 0,0 st
+%Cpu5 :100,0 us, 0,0 sy, 0,0 ni, 0,0 id, 0,0 wa, 0,0 hi, 0,0 si, 0,0 st
+%Cpu6 :100,0 us, 0,0 sy, 0,0 ni, 0,0 id, 0,0 wa, 0,0 hi, 0,0 si, 0,0 st
+%Cpu7 :100,0 us, 0,0 sy, 0,0 ni, 0,0 id, 0,0 wa, 0,0 hi, 0,0 si, 0,0 st
+KiB Mem :16373532 total,11701240 free, 2254256 used, 2418036 buff/cache
+KiB Swap:16724988 total,16724988 free,       0 used. 13751608 avail Mem 
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND     
+ 5850 batfai    20   0   68360    932    836 R 798,3  0,0   8:14.23 infty-f     
+]]></screen>  
+                                
+        <tip>
+            <title>Werkfilm</title>
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        <link xlink:href="https://youtu.be/lvmi6tyz-nI">https://youtu.be/lvmi6tyz-nI</link>
+                    </para>    
+                </listitem>                
+            </itemizedlist>                
+        </tip>
+    </section>        
+        
+    <section>
+        <title>Lefagyott, nem fagyott, akkor most mi van?</title>
+        <para>
+            Mutasd meg, hogy nem lehet olyan programot írni, amely bármely más programról eldönti, hogy le fog-e fagyni vagy sem!
+        </para>
+        <para>
+            Megoldás videó:
+        </para>
+        <para>
+            A példában emlitett „Lefagy” függvénynek bármely programról el kell tudnia dönteni hogy tartalmaz-e 
+            végtelen ciklust. Ez nem feltétlen valósulhat meg, pl.: ha tartalmaz végtelen ciklust akkor "true" értékkel kell 
+            visszatérnie viszont ha nem tartalmaz akkor elindít egy végtelen ciklust. Ekkor ha a T1000 program „nem lefagyó” 
+            akkor mindenképp lefagy mert ha a „Lefagy” függvény nem "true" értékkel tér vissza elindítja a végtelen ciklust. 
+            Tehát ilyen esetben saját magáról nem tudja eldönteni hogy van-e benne végtelen ciklus avagy sem. Azaz gyakorlatilag 
+            egy paradoxon jelenséggel állunk szemben.
+            Megjegyzés: Néhány fejlesztői környezet jelzi ha a programunkban van végtelen ciklus de ezek is többnyire csak 
+            a legegyszerűbbekre tudnak szűrni szintaktika alapján pl.: ha a programunk tartalmaz <literal>while(true)</literal>, 
+            <literal>while(1)</literal>, vagy <literal>for(;;)</literal>, ciklusokat. Amikor először próbáltam az első feladathoz írni
+            ilyen ciklust nekem a "Geany" fejlesztői környezetben való futtatáskor néhány másodperc után kilépett a ciklusból. 
+        </para>
+        <para>
+            Megoldás forrása:  tegyük fel, hogy akkora haxorok vagyunk, hogy meg tudjuk írni a <function>Lefagy</function>
+            függvényt, amely tetszőleges programról el tudja dönteni, hogy van-e benne vlgtelen ciklus:              
+        </para>
+        <programlisting language="c"><![CDATA[Program T100
+{
+
+	boolean Lefagy(Program P)
+	{
+		 if(P-ben van végtelen ciklus)
+			return true;
+		 else
+			return false; 
+	}
+
+	main(Input Q)
+	{
+		Lefagy(Q)
+	}
+}]]></programlisting>            
+        <para>
+            A program futtatása, például akár az előző <filename>v.c</filename> ilyen pszeudókódjára:
+            <screen><![CDATA[T100(t.c.pseudo)
+true]]></screen>            
+            akár önmagára
+            <screen><![CDATA[T100(T100)
+false]]></screen>  
+            ezt a kimenetet adja.          
+        </para>
+        <para>
+            A T100-as programot felhasználva készítsük most el az alábbi T1000-set, amelyben a
+            Lefagy-ra épőlő Lefagy2 már nem tartalmaz feltételezett, csak csak konkrét kódot:
+        </para>
+        <programlisting language="c"><![CDATA[Program T1000
+{
+
+	boolean Lefagy(Program P)
+	{
+		 if(P-ben van végtelen ciklus)
+			return true;
+		 else
+			return false; 
+	}
+
+	boolean Lefagy2(Program P)
+	{
+		 if(Lefagy(P))
+			return true;
+		 else
+			for(;;); 
+	}
+
+	main(Input Q)
+	{
+		Lefagy2(Q)
+	}
+
+}]]></programlisting>            
+        <programlisting><![CDATA[]]></programlisting>            
+        <para>
+            Mit for kiírni erre a <computeroutput>T1000(T1000)</computeroutput> futtatásra?
+                                
+            <itemizedlist>
+                <listitem>
+                    <para>Ha T1000 lefagyó, akkor nem fog lefagyni, kiírja, hogy true</para>                        
+                </listitem>
+                <listitem>
+                    <para>Ha T1000 nem fagyó, akkor pedig le fog fagyni...</para>                        
+                </listitem>
+            </itemizedlist>
+            akkor most hogy fog működni? Sehogy, mert ilyen <function>Lefagy</function>
+            függvényt, azaz a T100 program nem is létezik.                
+        </para>
+        <para>
+            A feladattal kapcsolatban készítettem egy folyamat ábrát. Ha nem igaz hogy tartalmaz végtelen ciklust, 
+            akkor visszatérünk újra ehhez az elágazáshoz, tehát lefagy a program. Amennyiben tartalmaz, kiírja tehát 
+            ellentmondásos.
+        </para>
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/paradoxfolyamat.jpg" format="JPG" scale="40" />
+            </imageobject>
+        </mediaobject> 
+
+
+    </section>        
+                
+    <section>
+        <title>Változók értékének felcserélése</title>
+        <para>
+            Írj olyan C programot, amely felcseréli két változó értékét, bármiféle logikai utasítás vagy kifejezés
+            nasználata nélkül!
+        </para>
+        <para>
+            Megoldás videó és forrás: <link xlink:href="https://bhaxor.blog.hu/2018/08/28/10_begin_goto_20_avagy_elindulunk">https://bhaxor.blog.hu/2018/08/28/10_begin_goto_20_avagy_elindulunk</link>
+        </para>
+        <para>
+            Megoldás forrása: ugyanott. 
+        </para>
+        <para>
+            Logikai utasítások nélkül a változók cseréjének legegyszerűbb módja segédváltozóval megcserélni 
+            az értékeket de egyéb megoldások is vannak pl.: az összeadásos vagy kivonásos.
+            Logikai utasítással is meg tudjuk ezt tenni, a legjobb példa erre a bitenkénti kizáró vagy (XOR).
+            Az én programom 3 fajta változócserét tud végrehajtani, és minden futtatáskor véletlenszerűen 
+            választott módszerrel teszi ezt meg de nyílván az eredmény mindig ugyanaz lesz.
+        </para>
+
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/valtozocsere.png" format="PNG" scale="45" />
+            </imageobject>
+        </mediaobject> 
+
+        <para>
+            Így néz ki a teljes program: 
+        </para>
+        <programlisting><![CDATA[
+        #include <time.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+int main()
+{
+    srand(time(NULL));
+    int r = rand() % 3;
+    printf("%d", r);
+    int a;
+    int b;
+    int seged;
+    printf("Minden futattasaskor egy random kivalasztott modeszert hasznalok.\nIrj be 2 megcserelendo valtozot!\n");
+    scanf("%d%d", &a, &b);
+    if( r == 0)
+    {
+        printf("a = %d es b = % d\nA valotozokat segedvaltozo hasznalataval cserelem meg.", a, b);
+        seged = a;
+        a = b;
+        b = seged;
+        printf("\nEkkor a valtozocsere utan: a = %d es b = %d.\n", a, b);
+    }
+    else if( r == 1)
+    {
+        printf("a = %d es b = % d\nA valotozokat az osszeadasos modszerrel cserelem meg.", a, b);
+        a = a + b;
+        b = a - b;
+        a = a - b;
+        printf("\nEkkor a valtozocsere utan: a = %d es b = %d.\n", a, b);
+    }
+    else
+    {
+        printf("a = %d es b = % d\nA valotozokat az kivonasos modszerrel cserelem meg.", a, b);
+        a = a - b;
+        b = a + b;
+        a = b - a;
+        printf("\nEkkor a valtozocsere utan: a = %d es b = %d.\n", a, b);
+    }
+    return 0;
+}
+        ]]></programlisting> 
+        <para>
+            A segédváltozós módszer használata:
+        </para>
+        <programlisting><![CDATA[
+        seged = a;
+        a = b;
+        b = seged;]]></programlisting>
+        <para>
+            Az összeadásos módszer használata:
+        </para>
+        <programlisting><![CDATA[
+        a = a + b;
+        b = a - b;
+        a = a - b;]]></programlisting> 
+        <para>
+            A kivonásos módszer használata:
+        </para>
+        <programlisting><![CDATA[
+        a = a - b;
+        b = a + b;
+        a = b - a;
+        ]]></programlisting>     
+
+    </section>                     
+
+    <section>
+        <title>Labdapattogás</title>
+        <para>
+            Először if-ekkel, majd bármiféle logikai utasítás vagy kifejezés
+            nasználata nélkül írj egy olyan programot, ami egy labdát pattogtat a karakteres konzolon! (Hogy mit értek
+            pattogtatás alatt, alább láthatod a videókon.)
+        </para>
+        <para>
+            Megoldás videó: <link xlink:href="https://bhaxor.blog.hu/2018/08/28/labdapattogas">https://bhaxor.blog.hu/2018/08/28/labdapattogas</link>
+        </para>
+        <para>
+            Megoldás forrása: ugyanott. 
+        </para>
+        <para>
+            A labdapattogtatós feladat lényege hogy a képernyőt úgy tudjuk használni mint egy 
+            koordináta rendszert (mivel az is). A kiválasztott karakterünket, akár az O betüt megadott pályán 
+            tudjuk, elindítani, itt fontos hogy kicsit elcsúsztatva kezdjük el a pattogtatást hogy be tudja járni az 
+            egész képernyőt. Ha pl x egyenlő 2, y egyenlő 2 értékeken inditjuk el akkor csak a képernyő egy átlóját tudja 
+            bejárni mivel csak azon az útvonalon fog oda-vissza pattogni. A képernyőnket mátrixként is lehet értelmezni.
+        </para>
+        <!--<para>
+            Nekem eszembe is jutott hogy a feladatot egy arduino és egy 8x8-as ledmátrix 
+            segítségével is megoldjam, viszont itt nem lehet azzal kompenzálni a dolgot hogy nem 0,0-ról 
+            indítjuk mivel egy négyzetről beszélünk. Tehát, ki kell vonni a buliból egy sort vagy oszlopot ahhoz, hogy 
+            szépen működjön a dolog, ennek ha sikerül utánanéznem még megoldom, de lehet nem fog belekerülniu végül
+            a könyvembe.
+        </para> -->
+        <para>
+            Viszont nézzük meg a C programot! Itt az if-eket úgy kerüljük me, hogy for ciklusokat használunk 
+            az if helyett, mégpedig úgy, hogy nem adunk kezdőértéket a ciklusváltozónak és nem is növeljük azt, 
+            ez egy gyönyörű for ciklusnak álcázott if függvény. És itt van a teljes kód is:
+        </para>
+
+        <programlisting><![CDATA[
+        #include <stdio.h>
+#include <curses.h>
+#include <unistd.h>
+
+//gcc bouncyO.c -o bouncyO -lncurses
+
+int main()
+{
+    WINDOW *ablak;
+    ablak = initscr();
+
+    int x = 0;
+    int y = 0;
+
+    int delX = 1;
+    int delY = 1;
+
+    int mx;
+    int my;
+    
+    while(true)
+    {
+        printf("\033[0;32m");
+
+        getmaxyx(ablak, my, mx);
+        mvprintw(y, x, "O");
+
+        refresh();
+        usleep(100000);
+        
+
+        clear();
+
+        x = x + delX;
+        y = y + delY;
+      
+       for(;x <= 0;)
+       {
+           delX = delX * -1;
+           break;
+       }
+       for(;x >= mx-1;)
+       {
+           delX = delX * -1;
+           break;
+       }
+       for(;y <= 0;)
+       {
+           delY = delY * -1;
+           break;
+       }
+       for(;y >= my-1;)
+       {
+           delY = delY * -1;
+           break;
+       }
+    }
+
+    return 0;
+}
+        ]]></programlisting>   
+
+        <para>
+            Képen annyira nem látszik mi történik, szóval a képhez kiszedtenm a kódból a 
+            clear-t így látszik szépen milyen utat jár be a labdánk.
+        </para>
+        
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/labda.png" format="PNG" scale="50" />
+            </imageobject>
+        </mediaobject> 
+
+        <para>
+            Vizsont azt is tudjuk, hogy a for és while ciklusokkal ügyesen lehet variálgatni, 
+            szóval a for ciklusokat kicseréltem while ciklusokra és így is tökéletesen lefutott a program.
+            Az alábbi kódcsipetben látható a while ciklusos megoldás is, illetve kommentben melletük a 
+            for ciklus testvérei a while-jainknak.
+        </para>
+
+        <programlisting><![CDATA[
+           while( !(x <=0))        //for(;x <= 0;)
+       {
+           delX = delX * -1;
+           break;
+       }
+       while(!(x >= mx-1))        //for(;x >= mx-1;)
+       {
+           delX = delX * -1;
+           break;
+       }
+        while(!(y <= 0))          //for(;y <= 0;)
+       {
+           delY = delY * -1;
+           break;
+       }
+       while(!(y >= my-1))        //for(;y >= my-1;)
+       {
+           delY = delY * -1;
+           break;
+       }
+    }
+        ]]></programlisting>
+
+    </section>   
+
+    <section>
+        <title>Szóhossz és Linus Tovald -féle BogoMIPS  </title>
+
+        <para>
+            A Linus Tovald féle BogoMIPS nevű program egy olyan program amivel a számítógépünk CPU-jának
+            sebességét tudjuk "mérni". A "MIPS" jelentése kettős a névben, az első a mérés módszerére utal, 
+            a szám amit kiad a program ugyanis azt állapítja meg, hogy a processzorunk hány millió utasítást tud 
+            végrehajtani másodpercenként, ezért a MIPS-nek az első kibontása így szól: Millions of Instructions Per Seconds.
+            Néhány Linux disztró esetén boot-olás során még mai napig kiírja ezt az értéket a gép, a hardware 
+            ellenőrzés során. Fontos megjegyeznünk, hogy ez egy "áltudományos mérés", a program névben erre a 
+            "Bogo" kifejezés utal. A "MIPS" másik jelentése: Meaningless Indication of Processor Speed.
+            Na de nézzük meg az én gépemnek mennyi a BogoMIPS-e!
+        </para>
+
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/bogo.png" format="PNG" scale="50" />
+            </imageobject>
+        </mediaobject> 
+
+        <para>
+            Láthatjuk, hogy ez egy 816-os érték. Megjegyezném, hogy itthon van mégegy hasonló workstation, 
+            abban jelenleg 2 db Xeon X5660-as processzort találunk, amikor még csak egy olyan volt benne 
+            akkor azon is végrehajtottam ezt a mérést és szintén 800 körüli értéket kaptam. Az én gépem most 
+            szintén 2 db nagyon hasonló X5650-s processzorral van megáldva, szerintem nem ugyanaz a számítási 
+            kapacitás tehát találó a "Bogo" jelző. Viszont térjünk rá a szóhosszra!
+        </para>
+
+        <para>
+            Ennél a feladatnál a BogoMIPS program while ciklusának fejét kell felhasználnunk ami: 
+            <command>while( loops_per_sec &lt;&lt;= 1)</command> formájú. 
+            Itt az történik a rövidke programon belül, hogy belül, hogy a bitshifttel, addig shifteljük 
+            balra a biteket amíg el nem érünk a végéig. A <command>szo</command> változónk értéke most éppen 1, 
+            tehát áll valamennyi 0-ból a baloldalán, ha pedig jobb oldalról olvassuk akkor 1 db 1-essel kezdődik, 
+            ha megtudjuk mennyi 0 áll az 0-es előtt megtudjuk hány biten tárolódik, ugye ehhez kell a bitshift.
+        </para>
+
+        <programlisting><![CDATA[
+           #include <stdio.h>
+
+int main()
+{
+    int szohossz = 0, szo = 1;
+    
+    do
+    {
+        
+        szohossz++;
+        
+    } while(szo <<= 1);
+    
+    printf("A szó %d bites\n", szohossz);
+    
+    return 0;
+}
+        ]]></programlisting>
+
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/szohossz.png" format="PNG" scale="50" />
+            </imageobject>
+        </mediaobject>
+
+        <para>
+            Fordítás és futtatás után megtudtuk, hogy 32 bites az 1-esünk. tehát áll 1 db 1-esből ami előtt 
+            tőle balra 31 dbg 0 szerepel.
+        </para>
+
+    </section>
+
+    <section>
+        <title>Hello Google!</title>
+
+        <para>
+            Ha csak nem más kereső motort használunk, akkor naponta nagyon sok alkalommal veszsük elő a jól 
+            ismert Google-t és keresünk rá valami kifejezésre. Amikor keresünk, reménykedünk benne, hogy a szükséges 
+            információ szerepelni fog az első pár találatban. De gondolkodtunk-e már rajta, hogy hogyan is talája meg 
+            a kereső motor a szémunkra leghasznosabb oldalakat? 
+        </para> 
+        <para>
+            Igazából ez is mint nagyon sok más dolog az emberi tényezőtől függ elsősorban, mégpedig ez most azt jelenti, 
+            hogy akik bizonyos weboldalakat szerkesztenek, mely más oldalakat linkelnek be a sajátjukra. Az alapja az algoritmusnak, 
+            hogy sorba kell rendezni a találatokat, aszerint kell sorbarendezni őket, hogy az úgynevezett "PageRank" értékük mekkora,
+            a PageRank pedig az adott weboldal minőségére utaló tulajdonság.
+        </para> 
+        <para>
+            Ehhez a feladathoz én készítettem egy ábrát, az alapja a Bátfai Norbert által készített diasor, ezt be is linkelem 
+            a kép alá. Csak kicsit átírtam rajta a jelöléseket, picit könnyebben emészhetővé próbáltam alakítani.
+        </para> 
+
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/linkmatrix.jpg" format="JPG" scale="45" />
+            </imageobject>
+        </mediaobject> 
+        <para>
+            Forrás:<link xlink:href="https://arato.inf.unideb.hu/batfai.norbert/UDPROG-BHAX/Prog1_2.pdf">Bátfai Norbert diasora</link>
+        </para>
+
+        <para>
+            Ez a rendszer gyakorlatilag egy 4 db honlapból álló gráf. A honlapokat nevezzük el A, B, C és D-nek. 
+            Mindegyikük rendelkezik egy "N" nevű tulajdonsággal, ami egy számmal írható le, ez a szám azt jelenti, 
+            hogy az adott oldalból hány db link fut ki. Az ábrán látható 4 honlap esetén N(A)=3, N(B)=2, N(C)=1 és 
+            N(D)=1. Belőük képeznünk kell egy linkmátrixot. A linkmátrix is fel van rajzolva, oszlopfolytonos módon a 
+            legegyszerűbb felrajzolnunk, most csak az A oszlopot írom le részletesen, utána a többi már magától értetődő 
+            lesz. Az A oszlop esetében nézzük az N(A) értéket, ez ugye 3, tehát A PageRank értékét egyenlően el kell 
+            osztanunk azon 3 honlap között amelyekre mutat, most minden PageRank legyen először 1, ekkor a mátrixban 
+            A oszlopában A-hoz 0 kerül mivel magára nem mutat, a többi 3 (B, C és D) oldal esetében pedig 1/3-mmal kell 
+            számolnunk, tehát A a saját "jóságát" egyenlően osztja el.
+        </para> 
+
+        <para>
+            A programban a main függvényen belül találjuk az elkészült linkmátrixot.
+        </para>
+
+         <programlisting><![CDATA[
+int main(void)
+{
+    double L[4][4] = 
+    {
+        {0.0, 0.0, 1.0/3.0, 0.0},
+        {1.0, 1.0/2.0, 1.0/3.0, 1.0},
+        {0.0, 1.0/2.0, 0.0, 0.0},
+        {0.0, 0.0, 1.0/3.0, 0.0}
+    };
+                
+    double PR[4] = {0.0, 0.0, 0.0, 0.0};
+    double PRv[4] = {1.0/4.0, 1.0/4.0, 1.0/4.0, 1.0/4.0};
+    ]]></programlisting>
+
+        <para>
+            Vegyük észre, hogy végtelen for ciklussal találkozunk, ugyanis ezeket a PageRank számításokat 
+            a szumma miatt a végtelenségig lehet számítani, minél többször fut le a ciklus annál pontosabb 
+            PageRank értéket kapunk a számítások végén. Ebből akkor tud kilépni, ha a <command>distance</command>
+            kisebb a megadott 0.00001 értéknél, ami ugye egy nevezetes azonosság gyöke lesz, ekkor kapja meg 
+            a breaket a for ciklusunk.
+        </para>
+
+    <programlisting><![CDATA[       
+    for(;;) 
+    {
+        for(int i = 0; i < 4; i++)
+        {
+            PR[i] = PRv[i];
+        }]]></programlisting>
+
+        <para>
+            Az itt található dupla for ciklusra azért van szükség, mert mátrix-szal dolgozunk.
+        </para>
+
+        <programlisting><![CDATA[  
+        for(int i = 0; i < 4; i++)
+        {
+            double tmp = 0.0;
+            for(int j = 0; j < 4; j++)
+            {
+                tmp += L[i][j] * PR[j];                
+            }
+            PRv[i] = tmp;
+        }
+        if(distance(PR, PRv, 4) < 0.00001)
+        {
+            break;
+        }
+    }
+    kiir (PR, 4);
+    return 0;
+}
+            ]]></programlisting>
+
+            <para>
+                Itt láthatjuk a <command>distance</command> függvény működését. A végén gyökön kell vonnunk az összegből, 
+                nálam azért van ilyen furcsén megoldva mert elsőre nem jöttem rá hogy fordításhoz a <command>sqrt</command>
+                függvny miatt kellene a -lm kapcsoló, aztán gondoltam 1/2-edik hatványra emelek így ez a kicsit matekos 
+                bonyolultabb megoldás maradt benne.
+            </para>
+
+            <programlisting><![CDATA[
+    #include <stdlib.h>
+    #include <math.h>
+                
+double distance (double PR[], double PRv[], int db)
+{
+    float pwr = 0.5;
+    double osszeg = 0.0;
+    for(int i = 0; i < db; i++)
+    {
+        osszeg += (PRv[i] - PR[i]) * ( PRv[i] - PR[i] );
+    }
+    return pow(osszeg, pwr);  //sqrt (osszeg);
+}]]></programlisting>
+
+
+
+        <programlisting><![CDATA[
+void kiir (double list[], int db)
+{
+    for(int i = 0; i < db; i++)
+    {
+        printf("PageRank [%d]: %lf\n", i, list[i]);
+    }
+}
+         ]]></programlisting>
+
+         <para>
+            Lefutattva a program a következő outputokat adja:
+         </para>
+
+         <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/pagerank.png" format="PNG" scale="50" />
+            </imageobject>
+        </mediaobject> 
+    
+    </section>
+
+    <section>
+        <title>Monty Hall probléma </title>
+        
+        <para>
+            A Monty Hall probléma egy amerikai TV műsorból ered, az alap szituáció az, hogy adott 3 db ajtó, 
+            melyek közül az egyik mögött nyereményt találunk. Választanunk kell ezek közül egyet, ez lesz a tippünk, 
+            1/3, azaz 33,33% esélyünk van a megfelő ajtót kiválasztani igaz? Monty Hall, a műsorvezető viszont picit 
+            megkavarja a dolgokat. Felfedi mi van az egyik -szükségszerűen nem nyertes és nem általunk választott- 
+            ajtó mögött, majd ezután megkérdezi a játékost, hogy szeretné-e megváltoztatni a döntését. Itt van a csavar, 
+            a műsor nézői arra lettek figyelmesek, hogy a döntésüket megváltoztató játékosok 2/3 része nyert. 
+            Ez akkor azt jelenti, hogy 1 db ajtóra, a 3 közül, 2/3 nyerési esély jut? Igen! Pontosan emiatt nevezhetjük 
+            a Monty Hall problémát matematikai paradoxonnak.
+        </para>
+
+        <para>
+            A feladat leírásában megtalálhatjuk Bátfai Norbert R nyelvű szimulációs programját. Ebben a programban 
+            hasonlóan az én 2. programomhoz, a gép sorsolja ki az eseteket, a nyertes és a választott ajtókat. Egyébként 
+            mint aogy láthatjuk, alapból 1000000 esettel dolgozunk, de kisebb nagyobb esetszámokat is vizsgálhatunk a kódot 
+            átírva. 
+        </para>
+
+        <para>
+            Mielőtt nekilátunk R programokat futtatni, ha még nem volt, akkor most telepítsük a szükséges dolgokat!
+            A paracsok amiket használnunk kell:
+            <screen>sudo apt-get install r-base</screen>
+            Futtatni pedig így tudjuk az R nyelvű programokat:
+            <screen>Rscript filenec.r</screen>
+        </para>
+        <para>
+            A fő különbség az én kódommal szemben, hogy az R nyelvű program előre generálja le az összes esetet, és ezeket 
+            vektorban tárolja majd később kiértékeli, míg az én programom legenerál egy esetet és egyből ki és értékeli. 
+        </para>
+        <programlisting><![CDATA[
+        kiserletek_szama=1000000
+kiserlet = sample(1:3, kiserletek_szama, replace=T)
+jatekos = sample(1:3, kiserletek_szama, replace=T)
+musorvezeto=vector(length = kiserletek_szama)
+
+for (i in 1:kiserletek_szama) {
+
+    if(kiserlet[i]==jatekos[i]){
+    
+        mibol=setdiff(c(1,2,3), kiserlet[i])
+    
+    }else{
+    
+        mibol=setdiff(c(1,2,3), c(kiserlet[i], jatekos[i]))
+    
+    }
+
+    musorvezeto[i] = mibol[sample(1:length(mibol),1)]
+
+}
+]]></programlisting>
+
+        <para>
+            Egy másik különbség, hogy ebben a programban kiszámoljuk hány esetben nyer a játékos 
+            ha változtat <command>length(valtoztatesnyer)</command> és ha nem változat a játékos 
+            <command>length(nemvaltoztatesnyer)</command>, míg az én programom csak azt mondja meg, 
+            hogy ha változtatunk a döntésen minden esetben akkor hány alkalommal lehet nyerni 
+            <command>X</command> esetből. 
+        </para>
+
+<programlisting><![CDATA[
+nemvaltoztatesnyer= which(kiserlet==jatekos)
+valtoztat=vector(length = kiserletek_szama)
+
+for (i in 1:kiserletek_szama) {
+
+    holvalt = setdiff(c(1,2,3), c(musorvezeto[i], jatekos[i]))
+    valtoztat[i] = holvalt[sample(1:length(holvalt),1)]
+    
+}
+
+valtoztatesnyer = which(kiserlet==valtoztat)
+
+
+sprintf("Kiserletek szama: %i", kiserletek_szama)
+length(nemvaltoztatesnyer)
+length(valtoztatesnyer)
+length(nemvaltoztatesnyer)/length(valtoztatesnyer)
+length(nemvaltoztatesnyer)+length(valtoztatesnyer)
+        ]]></programlisting>
+
+        <para>
+            Mindkét program esetében megjelenik ez a 2/3 nyerési arány, tehát szerintem mind a két 
+            program pontosan dolgozik. Lássuk egy printsceent!
+        </para>
+
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/mhR.png" format="PNG" scale="50" />
+            </imageobject>
+        </mediaobject>
+
+        <para>
+            Mivel nekem ez a feladat különösen tetszett, ezért C nyelven is megvalósítottam, mégpedig 2 változatban. 
+            Azzal kezdem amelyikből kiindultam. Ebben a programban anyereményjátékot le lehet játszani, a feljasználó 
+            választhat ajtót, és "Monty Hall" pedig felfed egyet majd a felhasználó dönthet arról, hogy másikat választ-e. 
+            Nézzük meg a kódomat!
+        </para>
+
+        <para>
+            Mindössze egy main függvényből áll a kód, viszont így is elég hpssuú, kb 280 sorról beszélünk, vázolom, hogy miért.
+            Először is deklaráltam, a váltózóimat, kisorsolunk egy random számot, 0, 1 vagy 2 lehet az értéke, ez alapján van kisorsolva, 
+            hogy melyik a nyertes ajtó. A <command>valasztott</command> változóban pedig tároljuk melyik ajtót választja a felhasználónk. 
+            A továbbiakban a döntése alapján ágazik el a programunk először 3 fő ágra, ezek közül én az első esetet mutatom be, a többi is nagyon 
+            hasonlóan működik. 
+        </para>
+
+        <programlisting><![CDATA[
+        int main()
+{
+    int ajto1;
+    int ajto2;
+    int ajto3;
+    int valasztott;
+    int r;
+    int valasz;
+    int nyertesjatekok = 0;
+    srand(time(NULL));
+    r = rand() % 3;
+    //r = 0;
+
+    printf("Valassz egy ajtot!\n");
+    scanf("%d", &valasztott);
+    printf("\nMost felfedem az egyik ajtot: \n");
+                ]]></programlisting>
+
+
+        
+
+        <para>
+            Tehát, az I. számú eset, amikor a random generálás során az 1-es ajtó lett a nyertes, ezt az első fő 
+            estet további 3 esetre kell bontanunk, a felhasználó ajtóválasztásától függően. Daraboljuk a kódot ily módon!
+        </para>
+
+        <para>
+            A felhasználó az első nyertes ajtót választotta, felfedjük a 3. számú ajtót, amit ugye nem választott 
+            és nem is nyertes, majd rábízzuk, a döntést, hogy újat választ-e. ekkor még 2 esetre bomlik ez az 
+            aleset is. Amikor eleve a nyertes ajtót választja a játékos az az eset amikor ha újat vákaszt akkor veszít, 
+            az összes eset 1/3 része ugye. 
+        </para>
+
+        <programlisting><![CDATA[
+        if( r == 0) //I. eset, az első ajtó a nyertes
+    {
+        ajto1 = 1;
+        ajto2 = 0;
+        ajto3 = 0;
+
+
+        if( valasztott == 1) //I./1 eset,  elve a nyertes ajtót választottuk
+        {
+            printf("A 3-mas szamu ajto nem nyertes.\nSzeretned a dontesed megvaltoztatni? (1 <-- Y/ 0 <-- N)\n");
+            scanf("%d", &valasz);
+
+            if(valasz == 1) //ekkor az eleve nyertesként választott ajtó helyett egy vesztes ajtót választunk
+            {
+                valasztott = 2;
+                printf("A valasztott ajtoban egy bena Porsce van. Porbald ujra!");
+            }
+
+            else if (valasz == 0) //maradunk a nyertes választásnál
+            {
+                printf("Nyertél! A nyeremenyed egy kecske!\n");
+                nyertesjatekok = nyertesjatekok + 1;
+                
+            }
+            else
+            {
+                printf("Invalid bemenet");
+            }
+        } 
+        ]]></programlisting>
+
+        <para>
+            A második és 3 esetben nem nyertes ajtót válaszott a játékosunk, ha ilyenkor felfedjük a másik 
+            nem nyertes ajtót akkor ha megváltoztatja a tippjét mindenképp nyerni fog, ez történik az 
+            <command>else if </command> és az <command>else</command> ágban is. Ugye így már látszik 
+            ez a 2/3-os arány? A II. és III. számú fő esetben is ugyanilyen szituáció alakul ki, tehát 
+            a nyerési esélyek csak ezzel a példával szemléltethetőek.
+        </para>
+
+        <programlisting><![CDATA[
+        else if(valasztott == 2) //I./2 eset,  elve a vesztes ajtót választottuk, az 1-es a nyertes
+        {
+            printf("A 3-mas szamu ajto nem nyertes.\nSzeretned a dontesed megvaltoztatni? (1 <-- Y/ 0 <-- N)\n"); //felfedem a 3mas ajtót
+            scanf("%d", &valasz);
+
+             if(valasz == 1) //ekkor a korábban választott vesztes ajtó helyett egy nyertes ajtót választunk
+            {
+                valasztott = 1;
+                printf("Nyertél! A nyeremenyed egy kecske!\n");
+                nyertesjatekok = nyertesjatekok + 1;
+            }
+
+            else if (valasz == 0) //maradunk a nyertes választásnál
+            {
+                printf("A valasztott ajtoban egy bena Porsce van. Porbald ujra!");
+            }
+            else
+            {
+                printf("Invalid bemenet");
+            }
+        }
+        else //I.3 vesztes ajót választottunk, a 3-masat
+        {
+            printf("A 2-es szamu ajto nem nyertes.\nSzeretned a dontesed megvaltoztatni? (1 <-- Y/ 0 <-- N)\n"); 
+            scanf("%d", &valasz);
+
+             if(valasz == 1) //ekkor a korábban választott vesztes ajtó helyett egy nyertes ajtót választunk
+            {
+                valasztott = 1;
+                printf("Nyertél! A nyeremenyed egy kecske!\n");
+                nyertesjatekok = nyertesjatekok + 1;
+            }
+
+            else if (valasz == 0) //maradunk a nyertes választásnál
+            {
+                printf("A valasztott ajtoban egy bena Porsce van. Porbald ujra!");
+            }
+            else
+            {
+                printf("Invalid bemenet");
+            }
+        }
+    }
+                ]]></programlisting>
+
+            <para>
+                Így néz ki a program ha futtatjuk, ez egy kis terminálos játék.
+            </para>
+
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/montyhall.png" format="PNG" scale="50" />
+            </imageobject>
+        </mediaobject>
+
+        
+
+        <para>
+            Viszont írtam egy olyan programot is ami úgy dolgozza fel az eseteket, mintha 
+            minden játék során a játékos új ajtót választana, az előző program tapasztalati és az R szimulációs 
+            program adta az ötletet ennek megvalósításához. Tehát elég minden ágban azt vizsgálni, hogy mi történik 
+            a döntés megváltoztatásakor. Nézzük a <command>main()</command> függvényt! Itt bekérünk 
+            egy vizsgálni kívánt esetszámot, és létrehozzuk a <command>nyertes</command> változót.
+            A for cikluson belül meghívjuk a <command>mh(r, tipp)</command> függvényt, a kisorsolt nyerő ajtóval 
+            és a szintén random sorsolt választott ajtóval, ha a függvény visszatérési értéke 1, 1-gyel növeljük 
+            a <command>nyertes</command> változót.
+        </para>
+
+        <programlisting><![CDATA[
+int main()
+{
+    int esetszam = 0;
+    int nyertes = 0;
+    int i;
+    int r;
+    int tipp;
+    srand(time(NULL));
+
+    printf("A program azt szimulalja, hogy minden esetben megvaltoztatjuk az eredeti dontesunket.\n");
+    printf("Ird be az altalad vizsgalni kivant esetszamot!\n");
+    scanf("%d", & esetszam);
+    printf("Esetszam: %d\n", esetszam);
+
+    for(i = 0; i < esetszam; i++)
+    {    
+        //kisorsolom az ajtót
+        r = rand() % 3;
+        //printf("r: %d\n", r);
+
+        //srand(time(NULL)); //kisorsolom a játékos tippjét
+        tipp = rand() % 3;
+        //printf("tipp: %d\n", tipp);
+
+        if( mh(r, tipp) == 1 )
+        {
+            nyertes = nyertes + 1;
+        }
+    }
+    printf("Nyertesjatekok szama: %d", nyertes);
+}
+
+        ]]></programlisting>
+
+        <para>
+            Itt pedig láthatjuk a <command>mh()</command> függvényt, az I, II és III fő esetekkel 
+            illetve annak aleseteivel dolgozik, tehát azzal, hogy melyik a nyertes ajtó és melyiket "választotta" 
+            a játékos. Ha az I/1.-es esetet vizsgáljuk, az 1. a nyertes ajtó és azt választotta a játékos, ha 
+            ekkor megváltoztatja a döntését -márpedig megváltoztatja- akkor nem nyert tehát a függvéyn 0 értékkel 
+            tér vissza.
+        </para>
+
+        <programlisting><![CDATA[
+
+        int mh(int ajto, int valasztott)
+{
+    if( ajto == 0) //I. eset, az első ajtó a nyertes
+    {
+        if( valasztott == 0) //I./1 eset,  elve a nyertes ajtót választottuk
+        {
+            return 0;
+        } 
+        else if(valasztott == 1) //I./2 eset,  elve a vesztes ajtót választottuk, az 1-es a nyertes
+        {
+            return 1;
+        } 
+        else //I.3 vesztes ajót választottunk, a 3-masat
+        {
+            return 1;
+        }
+    }
+
+    else if( ajto == 1)
+    {
+        if( valasztott == 0) //I./1 eset,  elve vesztes ajtót választottuk
+        {
+            return 1;
+        } 
+        else if(valasztott == 1) //I./2 eset,  eleve a nyertes ajtót választottuk, az 1-es a nyertes
+        {
+            return 0;
+        }
+        else //I.3 vesztes ajót választottunk, a 3-masat
+        {
+            return 1;
+        }
+    }
+
+    else
+    {
+        if( valasztott == 0) //I./1 eset,  elve a vesztes ajtót választottuk
+        {
+            return 1;
+        }
+        else if(valasztott == 1) //I./2 eset,  elve a vesztes ajtót választottuk, az 1-es a nyertes
+        {
+            return 1;
+        } 
+        else //I.3 nyertes ajót választottunk, a 3-masat
+        {
+            return 0;
+        }
+    }
+}
+        ]]></programlisting>
+
+        <para>
+            Az mh3.c nevű programom pedig így néz ki lefuttatva. 
+        </para>
+
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/mh3.png" format="PNG" scale="50" />
+            </imageobject>
+        </mediaobject>
+
+        
+
+    </section>
+
+    <section>
+        <title>100 éves a Brun Tétel </title>
+        <para>
+            1919-ben Viggo Brun felfedezett egy speciális számot, egy konstanst, amit Brun-konstansnak emlegetünk.
+            Mi teszi ezt a számot olyan különlegessé? Ahhoz, hogy ezt megértsük az alapjainál próbálom megragadni a 
+            témát.
+        </para>
+        <para>
+            A csak 1-gyel és önmagukkal osztható prímszámokról szerintem a könyv olvasója már biztosan hallot, általános 
+            iskolában is tanuljuk matematika órán, azt is tudjuk már, hogy a prímszámok halmazának számossága végtelen,
+            viszont kevsebben hallottak az ikerprímekről, vagy a négyes prímekről, de most az ikerprímeket vizsgáljuk meg átfogóbban.
+            Az ikerprímek halmaza a prímszámok halmazának egy részhalmaza, olyan speciális számpárosokat tartalmaz, melyekben mindkét 
+            szám prím és különbségük pontosan 2. Ilyen ikerprímek pl.: 3 és 5, 5 és 7 vagy a 17 és 19. Ezekkel kapcsolatban még nincs bizonyítva, 
+            hogy számuk véges vagy végtelen lenne, még ma is a matematika egyik nagy kérdése. Viszont ezekkel a különleges számokkal kapcsolatban 
+            amit már biztosan tudunk, hogy közük van a Brun-konstanshoz.
+        </para>
+        <para>
+            A Brun-konstans azért érdekes az ikerprímekkel kapcsolatban mivel ha sorra vesszük az ikerprímeink reciprokösszegeit 
+            észre kell vennünk, hogy egy számhoz közelítenek az értékek, a Brun konstanshoz, azaz ahhoz konvergálnak a reciprok összegek.
+        </para>
+        <para>
+            A feladathoz kaptunk egy R nyelven írt kódot, ez egy Bátfai Norbert által írt kód. A program egy grafikonon kirajzolja nekünk, 
+            hogy az ikerprímek reciprok összeg értéke, hogyan konvergál a Brun-Konstanshoz, ami megközelítőleg 1.90216, tehát valahol a 2 körül 
+            találnánk meg a számegyenesen.
+        </para>
+        <para>
+            Mielőtt elemezzük és futattjuk a kódot megjegyeznm, hogy bizonyos könyvtárak szükségesek a futtatásához. Én telepítettem már 
+            korábban egy R Studio-t ami felajánlotta a hiányzó könyvtárak telepítését, így nem kellett manuálisan megcsinálnom.
+        </para>
+        <para>
+            Itt látható a rövidke kód ami számol nekünk. Ha megfigyeljük, a program a <command>matlab</command> könyvtár hívásával 
+            kezdődik, erről írtam, hogy ennek a telepítése szükséges lesz a futtatáshoz. Ezt követően létrehozzuk az <command>stp</command>
+            függvényt ami a számításokat fogja végezni.
+        </para>
+        <para>
+            Az <command>stp</command> függvényben először megkeressük a prímszámokat, majd a szomszédos prímek közti különbséget vizsgáljuk.
+            Látható hogy az <command>idx</command> nevű változóba gyűjtjük azoknak a prímeknek az indexét, melyek közt a különbség 2 volt, tehát 
+            ikerprímek. A megtalált ikerprímeknek ezután a reciprokát képezzük majd ezeket a számokat összeadjuk. Az <command>stp</command> függvény 
+            ezután az ikerprímek reciprokösszegények szummájával tér vissza. Ezzel megvizsgáltuk a program legfontosabb részét, már csak a grafikon 
+            kirajzoltatása van hátra.
+        </para>
+        <programlisting><![CDATA[
+
+        library(matlab)
+
+stp <- function(x){
+
+    primes = primes(x)
+    diff = primes[2:length(primes)]-primes[1:length(primes)-1]
+    idx = which(diff==2)
+    t1primes = primes[idx]
+    t2primes = primes[idx]+2
+    rt1plust2 = 1/t1primes+1/t2primes
+    return(sum(rt1plust2))
+}]]></programlisting>
+
+        <para>
+            A kirajzoltatáshoz használunk egy <command>x</command>-et és egy <command>y</command>-t. Az <command>x</command>-ben egy sorozatot 
+            veszünk 13-tól egészen 1000000-ig, majd az <command>y</command> pedig megkapja az <command>stp</command> visszatérési értékét, 
+            ezzel megalkotva a koordináta rendszert. Aki használt már korábban Matlabot annak a <command>plot</command> ismerős lehet, 
+            matlabban ezzel a függvénnyel tudjuk ábrázolni azokat amiket szeretnénk, és mivel meghívtuk a megfelő könyvtárat, most is ezt használhatjuk. 
+            
+        </para>
+<programlisting><![CDATA[
+
+x=seq(13, 1000000, by=10000)
+y=sapply(x, FUN = stp)
+plot(x,y,type="b")
+
+        ]]></programlisting>
+
+        <para>
+            A futtatás után egy pdf-et kapunk amely ábrázolja hogy az ikerprímek reciprokösszegei hogyan konvergálnak a Brun-konstanshoz.
+        </para>
+
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/bruntetel.png" format="PNG" scale="40" />
+            </imageobject>
+        </mediaobject>
+
+    </section>
+    <section>
+        <title>MALMÖ | folytonos csiga feladat </title>
+        
+        <para>
+            Ehhez a feladathoz 2 megoldásom társul. az egyik Pythpn nyelven a mésik pedig C++-ban. Viszont mind a 
+            kettő folytonos mozgási parancsokkal dolgozik.
+        </para>
+        <para>
+            Nézzük először a Python kódot. Itt az történik, hogy Steve elkezd csiga vonalban egyre fentebb és fentebb menni 
+            az arénában, úgy hogy tőle a fal mindig balra van, tehát a sarkokban jobbra kell fordulnia. Én ebben a megoldásban 
+            2 egymásba ágyazott for ciklust használtam, a külső 128-szor tudna maximum végrehajtódni, ez cvsak azért maradt annyi 
+            mert egy nagy számot akartam írni, hogy ne hagyja abba a mozgását véletlenül sem. Ez a for ciklus azért felelős, hogy 
+            a szinteken fentebb tudjon menni.
+        </para>
+        <para>
+            A belső for ciklus mindig 4 alkalommal fut le, azért mert az arénának 4 oldala van és azt szeretnénk, hogy Steve minden 
+            szinten körbeérjen. Ebben a ciklusban mindig <command>.87 * i</command> ideig végzi a mozgást, vagyis az előre haladását.
+            Ez ennél a programnál egyfajta "varázsszám" volt, hogy a folytonos mozgási parancsokkal nagyjából megfelő hosszakat mozogjon 
+            szintenként. Ezután jobbra fordul egyet. Ha a belső for ciklus 4 alkalommal már lefutott, azaz Steve egy szintet bejárt, 
+            akkor Ugrik egyet, hogy a következő szinten folytassa a mozgását.
+        </para>
+        <programlisting><![CDATA[
+        def run(self):
+        world_state = self.agent_host.getWorldState()
+        i = 1
+        j = 1
+        # Loop until mission ends:
+        while world_state.is_mission_running:
+            print("--- nb4tf4i arena -----------------------------------\n")
+            for i in range(128):
+                for j in range(4):
+                    self.agent_host.sendCommand( "move 1" )
+                    time.sleep(.87 * i)            
+                    self.agent_host.sendCommand( "turn 1" )
+                    time.sleep(.5)
+                    self.agent_host.sendCommand( "turn 0" )
+                    time.sleep(.5)
+                self.agent_host.sendCommand( "jump 1" )
+                time.sleep(.5)
+                self.agent_host.sendCommand( "jump 0" )
+                time.sleep(.5)
+
+            world_state = self.agent_host.getWorldState()
+            ]]></programlisting>
+        
+        <para>
+            Megoldás videó: <link xlink:href="https://bit.ly/35lQDlD"> Folytonos csiga python-ban</link> 
+        </para>
+        <para>
+            A videón látszik, hogy ugyan valóban csiga vonalban megy felfelé az arénában Steve, elég szerencsétlenül mozog. Ez a 
+            folytonos mozgásnak tudható be, ugyanis így nem tud olyan precízen mozogni mint diszkrét parancsokkal, ilyenkor a "turn 1"
+            sem azt jelenti, hogy 90 fokkal forduljon jobbra hanem inkább "fordul jobbra valamerre".
+        </para>
+
+        <para>
+            A C++ verzió egy sokkal egyszerűbb kód, itt Steve csak forog és nem is az arénában van szemmel láthatóan. Itt 
+            annyit mondtunk Steve-nek, hogy 0.5 másodpercig menjen előre majd ugyanennyi ideig forduljon jobbra. Csak ezt a 
+            <command>do-while</command> ciklust vágtam ide, ugyanis itta djuk Steve-nek a mozgási parancsokat. Szerintem python-ban 
+            érdemesebb próbálkozni a Malmövel, C++-ban több hibalehetőségünk van.
+        </para>
+        <programlisting><![CDATA[
+        do {
+        agent_host.sendCommand("move 1");
+        boost::this_thread::sleep(boost::posix_time::milliseconds(500));
+
+        agent_host.sendCommand("turn 1");
+        boost::this_thread::sleep(boost::posix_time::milliseconds(500));
+
+        world_state = agent_host.getWorldState();
+        for( boost::shared_ptr<TimestampedString> error : world_state.errors )
+            cout << "Error: " << error->text << endl;
+    } while (world_state.is_mission_running);
+        ]]></programlisting>
+        <para>
+            Megoldás videó: <link xlink:href="https://bit.ly/2YqhZ8G"> Folytonos csiga C++-ban</link> 
+        </para>
+        <para>
+            A videó 3 feladatmegoldást tartalmaz. ezek közül a kapcsolódó az első lesz. Megjegyzem, hogy a 
+            legoptimálisabb beállításokkal sem tudtam lerenderelni nem szemcsésre a videót, de szerintem a feladatok lényegi része 
+            így is látszik.
+        </para>
+        
+
+    </section>
+</chapter>

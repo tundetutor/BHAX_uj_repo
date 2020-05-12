@@ -1,0 +1,771 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, Caesar!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+    <section>
+        <title>Double ** háromszögmátrix</title>
+        <para>
+            Írj egy olyan <function>malloc</function> és <function>free</function>
+            párost használó C programot, amely helyet foglal
+            egy alsó háromszög mátrixnak a szabad tárban!
+        </para>
+        <para>
+            Megoldás videó: <link xlink:href="https://youtu.be/1MRTuKwRsB0">https://youtu.be/1MRTuKwRsB0</link>,
+            <link xlink:href="https://youtu.be/RKbX5-EWpzA">https://youtu.be/RKbX5-EWpzA</link>.
+        </para>
+        <para>
+            A program működését a védés videómban is bemutatom sorról sorra, <link xlink:href="https://www.youtube.com/watch?v=PFp9pU-l6KY">itt megtekinthető</link>.
+        </para> 
+        <para>
+          A mátrixok körében találkozhatunk speciális mátrixokkal, például kvadratikus, azaz négyzetes mátrixokkal melyek sorai és oszlopai megegyező számúak. 
+          Viszont a négyztes mátrixok között is találhatunk speciális mátrixokat, ezek a háromszögmátrixok. A háromszög mátrixok olyan mátrixok melyekben vagy a 
+          főátló alatt vagy a főátló fölött csupa 0 értékű elemeket találunk, az alsóháromszög mátrix esetében a főátló fölött szerepelnek ezek a 0 értékek. 
+          Fontos megemlíteni, hogy a programunk sorfolytonos mátrixot készít, tehát soronként balról jobbra haladunk!
+          A programunk is ilyen mátrixot dolgoz föl, szóval nézzük is meg, hogy hogyan működik! Nézzük meg a Bátfai Norbert által készített ábrát!
+        </para>
+        <figure>
+            <title>A <type>double **</type> háromszögmátrix a memóriában</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/doublecscs.png" scale="50" />
+                </imageobject>
+                <textobject>
+                    <phrase>A <type>double **</type> háromszögmátrix a memóriában</phrase>
+                </textobject>
+            </mediaobject>
+        </figure> 
+        <para>
+            Látjuk, hogy a 8 bájt méretű <command>double **tm</command> mutató egy (ez esetben) 5 elemű mutatókból álló tömbre mutat amely 5 db <command>double *</command> 
+            mutatót tartalmaz, azaz ez 40 bájtot foglal a memóriából. Ezek a  <command>double *</command> mutatók pedig már a mátrixunk egy-egy sorára mutatnak amelyek 
+            attól függően hányadik sorról beszélünk tartalmaznak valamennyi <command>double</command>-t. Ez összesen 168 bájt, ha mindet össze számoljuk.
+        </para>
+        <para>
+           A forráskód elején meghívjuk a szükséges könyvtárakat, a <command>malloc()</command> használatához az <command>stdlib.h</command>-ra lesz szükségünk.
+           Ezután a főprogramban deklarálunk egy <command>nr</command> nevű int típúsú változót, ez adja meg a mátrix sorainak a számát, majd egy 
+           <command>double **tm</command> mutatót.
+        </para>
+        <programlisting language="c"><![CDATA[#include <stdio.h>
+#include <stdlib.h>
+
+int
+main ()
+{
+    int nr = 5;
+    double **tm;
+]]></programlisting>
+        <para>
+           Ezután lefoglaljuk a <command>double *</command> mutatók helyét egy <command>malloc()</command> függvénnyel, mégpedig úgy, hogy 
+           a sorok számámal szorozzuk a <command>double *</command> méretét, hogy meglegyen amutatókból álló tömbünk helye. Majd egy for ciklussal 
+           lefoglaljuk a sorokat is. Itt arra kell figyelnünk, hogy mindig eggyel több oszlopunk lesz az adott sorban ezért mindig <command>i + 1</command> 
+           mennyiségű double-nek kell helyet találni a szabad memóriában.
+        </para>
+        <programlisting language="c"><![CDATA[
+    if ((tm = (double **) malloc (nr * sizeof (double *))) == NULL)
+    {
+        return -1;
+    }
+
+    printf("%p\n", tm);
+    
+    for (int i = 0; i < nr; ++i)
+    {
+        if ((tm[i] = (double *) malloc ((i + 1) * sizeof (double))) == NULL)
+        {
+            return -1;
+        }
+
+    }
+]]></programlisting>
+        <para>
+            Most hogy már megvan a megfelő mennyiségű hely ideje feltölteni a mátrixunkat! Ezt kettő for ciklus segítségével oldjuk meg, a 
+            külső annyi alkalommal fut le ahány sora van a mátrixunknak a belső pedig mindig annyiszor ahanyadik sorról van szó mivel az első 
+            sorba egy elem kerül a belső ciklus egyszer fut le, a második sorba kettő tehát kétszer fut le és így tovább. Az értékadáshoz egy 
+            a háromszögmátrixoknál használatos képletet adunk meg így az adott elem mindig a mátrixban elfoglalt "sorszáma" lesz. 
+        </para>
+        <programlisting language="c"><![CDATA[
+    for (int i = 0; i < nr; ++i)
+        for (int j = 0; j < i + 1; ++j)
+            tm[i][j] = i * (i + 1) / 2 + j;
+]]></programlisting>
+        <para>
+            Most következik az elemek kiíratása. Ehhez az előbb használt for ciklus párosunkra lesz szükség, nemes egyszerűséggel kiíratjuk 
+            a megfelő elemeket, a külső for ciklus pedig a lefutása végén mindig "kiír" egy sortörést, hogy szépen legyen ábrázolva a mátrix.
+        </para>
+        <programlisting language="c"><![CDATA[
+        for (int i = 0; i < nr; ++i)
+    {
+        for (int j = 0; j < i + 1; ++j)
+            printf ("%f, ", tm[i][j]);
+        printf ("\n");
+    }
+]]></programlisting>   
+        <para>
+            Az utolsó lépés a lefoglalt tárhely felszabadítása lesz. Most fordítva csináljuk mint a helyfoglalásnál, először a mutató tömböt 
+            szabadítjuk fel majd magát a <command>tm</command>-et, a <command>free()</command> függvény használatával.
+        </para>
+        <programlisting language="c"><![CDATA[
+        for (int i = 0; i < nr; ++i)
+        free (tm[i]);
+
+        free (tm);
+]]></programlisting>                
+                   
+    </section>        
+    <section>
+        <title>C EXOR titkosító</title>
+        <para>
+            Írj egy EXOR titkosítót C-ben!
+        </para>
+        <para>
+            Megoldás forrása: egy részletes feldolgozása az 
+            <link xlink:href="https://progpater.blog.hu/2011/02/15/felvetelt_hirdet_a_cia">e.c és t.c forrásoknak</link>.               
+        </para>
+        <para>
+            A titkosítás fogalma gyakran felbukkan. Az emberek évszázadok óta titkosítanak szövegeket különböző eljárásokkal, 
+            hogy csak azok tudják azt visszafekteni akik ismerik a titkosítás szabályát. Erre a legklasszikusabb példa amikor 
+            úgy írunk szövegeket, hogy egy betű helyett azt kell olvasnunk amely az ABC-ben előtte hárommal szerepel, ezt hívjuk Caesar titkosításnak.
+            Az informatika világában pedig hatványozottan fontos a titkosítás, az ezzel foglalkozó területet kriptográfiának nevezzük.
+            A példaprogramunk is szöveg titkosításra alkalmas program és itt is igaz, hogy az tud hozzáférni a titkosított információhoz 
+            aki ismeri a titkosítás szabályát. No de mi is az EXOR titkosító program szabálya?
+        </para>
+        <para>
+            A programunk egy kulccsal és egy titkosítandó szöveggel dolgozik, két részre fogom bontani a programot, hogy aszerint írjam le a működését.
+            Az első részben meghívjuk a szükséges header fájlokat és definiáljuk a MAX_KULCS és a BUFFER_MERET konstansokat. A kulcsot és a titkosítandó 
+            szöveget karaktertömbként értelmezhetjük, illetve létrehozzuk a kulcs_index és olvasott_bajtok változókat.
+        </para>
+        <programlisting language="c">
+        <![CDATA[
+        #include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+
+#define MAX_KULCS 100
+#define BUFFER_MERET 256
+
+
+int
+main (int argc, char **argv)
+{
+
+  char kulcs[MAX_KULCS];
+  char buffer[BUFFER_MERET];
+
+  int kulcs_index = 0;
+  int olvasott_bajtok = 0;
+
+  int kulcs_meret = strlen (argv[1]);
+  strncpy (kulcs, argv[1], MAX_KULCS);
+    ]]>
+        </programlisting>
+        <para>
+            A program második részében történik maga a titkosítás folyamata. Egy while ciklus végigmegy a bufferen és a while ciklusban lévő for ciklus 
+            pedig egyesével lépked a szöveg bájtjain. A buffer aktuális elemét, egy karaktert a szövegből ezután mindig "összeexoroz" a kulcs aktuális karakterével. 
+            Ilyen az történik, hogy a kulcs adott bájtján és a szöveg adott bájtján elvégzi az EXOR azaz a kizáró vagy logikai műveletet, a C-ben ennek jele a "^".
+            Minden ilyen művelet elvégzése után léptet a program a kulcs aktuális karakterén. Ha a while ciklus lefutott készen van a titkosítás. Tehát az 
+            előbb említett titkosítás szabálya a kulcs megfelelő karakterével és a szöveg megfelelő karakterével történő kizáró vagy művelet elvégzése.
+            Ha vissza szeretnénk alakítani a szövegünket ugyanezt a programot kell futattnunk azzal a kulccsal amivel titkosítottunk. Tehát itt a kulcs a titkosítás 
+            feltöréséhez szükséges indormáció.
+        </para>
+
+
+        <programlisting language="c">
+        <![CDATA[
+  while ((olvasott_bajtok = read (0, (void *) buffer, BUFFER_MERET)))
+    {
+
+      for (int i = 0; i < olvasott_bajtok; ++i)
+      {
+
+        buffer[i] = buffer[i] ^ kulcs[kulcs_index];
+        kulcs_index = (kulcs_index + 1) % kulcs_meret;
+
+      }
+
+      write (1, buffer, olvasott_bajtok);
+
+    }
+}
+        ]]>
+      </programlisting>
+        <para>
+            Ha ez megtörtént a szövegünkből egy értelmezhetetlen bitsorozat keletkezik. Mivel a kizáró vagynak kiszámítathatlan eredményei lehetnek ezért 
+            ha kiíratjuk a szöveget akkor nagyon ritka hogy ASCII karaktert találunk benne. A titkosított szöveg kinézete engem arra emlékeztett, hogy hogyan néz 
+            ki egy <command>cat</command> pranaccsal szövegként kiíratott <command>.blend</command>, azaz 3D-s fájl.
+        </para>
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/unaris.jpg" format="JPG" scale="60" />
+            </imageobject>
+        </mediaobject> 
+        <para>
+            A könyvemből származó szöveg titkosítása a "maki" kulccsal.
+        </para>
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/unaris.jpg" format="JPG" scale="60" />
+            </imageobject>
+        </mediaobject> 
+        <para>
+            Az előző szövegen lefuttatva a program ugyanazzal a kulccsal.
+        </para>
+    </section>        
+    <section>
+        <title>4.3 Java EXOR titkosító</title>
+        <para>
+            Írj egy EXOR titkosítót Java-ban!
+        </para>
+        <para>
+            Megoldás videó:
+        </para>
+        <para>
+            Megoldás forrása: <link xlink:href="https://www.tankonyvtar.hu/hu/tartalom/tkt/javat-tanitok-javat/ch01.html#exor_titkosito">https://www.tankonyvtar.hu/hu/tartalom/tkt/javat-tanitok-javat/ch01.html#exor_titkosito</link>               
+        </para>
+        <para>
+            Mivel én még elég kezdőnek számítok a programozás világában nem igazán találkoztam ez előtt a Java nyelvvel ezért ehhez a feladathoz 
+            <link xlink:href="https://github.com/czanikan/BHAX/blob/master/bhax-textbook-fdl.pdf">Czanik András</link> segítségét kértem.
+        </para>
+        <para>
+           A Java objektum orientált nyelv, sajátossága, hogy mindenképp osztályokat kell használnunk a programok írásához ha ezt a nyelvet szeretnénk használni. 
+           Ennek vannak előnyei és hátrányai is. Az egyik hátrány szerintem akkor jelenik meg ha pici programokat szeretnénk írni, nézzünk egy példát a 
+           klasszikus Hello World program megvalósítására Javaban!
+        </para>
+        <programlisting language="java">
+        <![CDATA[class Hello
+{
+public static void main (String args[])
+{
+System.out.println("Java Hello World");
+}
+}
+        ]]>
+      </programlisting>
+        <para>
+            Míg ugyanez a program Pythonban összesen egy sor, pedig mindkét esetben objektum orientált nyelvről beszélünk.
+        </para>
+      <programlisting language="python">
+        <![CDATA[print("Hello, World!")]]>
+      </programlisting>
+      
+        <para>
+           Ugyanakkor ha nagyobb, összetett programokat szretnénk írni nem véletlenül ajánlják a Javat, egyszerű fordítani és futtatni a kódokat, többek között emiatt 
+           használják sokan illetve pár éve a gazdasági szektorban is "industrial standard" programozási nyelv volt. Nézzük meg azonban a titkosító programot! 
+           Az első dolog amit megfigyelhetünk, hogy létrehozunk egy <function>main</function> 
+           nevű osztályt, szükségszerűen az osztály nevének egyeznie kell a program nevével. Az osztályban találunk egy <function>encode</function> 
+           függvényt, ez fogja végezni magát a titkosítást, ezt nem fogom bővebben részletezni, mivel teljesen ugyanúgy működik mint az előző feladatban 
+           tárgyalt program.
+        </para>
+
+      <programlisting language="java">
+        <![CDATA[
+        import java.io.InputStream;
+     import java.io.OutputStream;
+
+public class main
+{
+    public static void encode (String key, InputStream in, OutputStream out) throws java.io.IOException
+    {
+        byte[] kulcs = key.getBytes(); 
+        byte[] buffer = new byte[256]; 
+        int kulcsIndex = 0;
+        int readBytes = 0;
+
+        while((readBytes = in.read(buffer)) != -1) 
+        {
+            for(int i=0; i<readBytes; i++)
+            {
+                buffer[i] = (byte)(buffer[i] ^ kulcs[kulcsIndex]); //itt csinálja az összeEXOR-ozást
+                kulcsIndex = (kulcsIndex + 1) % key.length();
+            }
+
+            out.write(inputBuffer, 0, readBytes); 
+        }
+    }]]>
+      </programlisting>
+
+        <para>
+           A program második részében találjuk a <function>main</function> nevű osztálykonstruktort. Ebben a részben főleg hibakeresést, találunk, 
+           a <function>try</function> részben figyeli, hogy érkezik-e bemenet, azaz kulcs, mivel az az első argumentum, ha nem akkor a program leáll, 
+           és hibaüzenetet kapunk vissza.
+        </para>
+
+    <programlisting language="java">
+        <![CDATA[
+    public static main (String[] args)
+    {
+        if(args[0] != "") 
+        {
+            try
+            {
+                encode(args[0], System.in, System.out); //
+            }
+            catch(java.io.IOException e) 
+            {
+                e.printStackTrace();
+            }
+        }
+        else 
+        {
+            System.out.println("Please provide a key!");
+            System.out.println("java main <key>");
+        }
+
+    }
+}
+        ]]>
+      </programlisting>
+    </section>        
+    <section xml:id="bhax-textbook-feladatok-caesar.EXOR-toro">
+        <title>EXOR törő</title>
+        <para>
+            Írj egy olyan C programot, amely megtöri az első feladatban előállított titkos szövegeket!
+        </para>
+        <para>
+            Megoldás videó:
+        </para>
+        <para>
+            Megoldás forrása:                
+        </para>
+        <para>
+            Adott volt az előző feladatban a t.c program ami arra való hogy ugye XOR titkosított szövegeket törjünk vele. 
+            Labor feladat volt ezt kivitelezni is, amit sikerült is megoldanom pár esetben. Nagyon felbosszantott hogy nem tudtam
+            mindenki szövegét törni majd utána jártam a dolognak hogy mi volt a baj...
+        </para>
+        <para>
+            Ha az előző feladatokban már sikerült egy titkosított szöveget előállítanunk akkor felmerülhet bennünk a kérdés, hogy a kulcs ismeretének 
+            hiányában hogyan kaphatjuk vissza az eredeti szöveget. Az ötlet az lenne, hogy próbáljuk ki minden lehetséges kulcsot, az ilyen törési 
+            technikát "brute force"nak nevezzük, azaz "nyers erő". Ez egy nagyon gyakori törési technika és például a különböző felhasználó fiókok ettől 
+            általában védve is vannak a próbálkozási lehetőségek korlátozásával, vagy esetleg valamilyen más védelemmel. A jelszavainkat ezért is érdemes 
+            több típúsú karakterből összeollózni mivel nagyobb védelmet biztosít, több karakter kell a programnak végigpróbálgatnia. Azokat a karaktereket 
+            amelyekkel próbálkozni akarunk egy tömbbe tesszük, ez lesz a karakterkészletünk. Én a Bátfai Norbert által írt programot az egyik laboron kiírt 
+            feladathoz módosítottam azaz a karakterkészletet lényegesen lecsökkentettem egészen pontosan 4 karakterre. 
+        </para>
+        <para>
+            A program első részében definiáljuk a konstansainkat, azaz a kulcsnéretet és a buffer méretét, illetve meghívjuk a szükséges könyvtárakat.
+        </para>
+        <programlisting language="c"><![CDATA[#define MAX_TITKOS 4096
+            #define OLVASAS_BUFFER 256
+            #define KULCS_MERET 4
+            #define _GNU_SOURCE
+            
+            #include <stdio.h>
+            #include <unistd.h>
+            #include <string.h>
+            
+            }]]></programlisting>
+        <para>
+            A forráskódban találnunk egy <function>void exor</function> névvel ellátott eljárás, ez végzi az előző feladatokban 
+            tárgyalt titkosítás a bitenkénti kizáró vagy művelettel.
+        </para>
+        <programlisting language="c"><![CDATA[
+            void
+exor (const char kulcs[], int kulcs_meret, char titkos[], int titkos_meret)
+{
+
+  int kulcs_index = 0;
+
+  for (int i = 0; i < titkos_meret; ++i)
+    {
+
+      titkos[i] = titkos[i] ^ kulcs[kulcs_index];
+      kulcs_index = (kulcs_index + 1) % kulcs_meret;
+
+    }
+
+}
+            }]]></programlisting>
+        <para>
+            Viszont, nem elég végigzongoráznunk a kulcsokat, hiszen a program magától nem tudja, hogy egy exorral mikor sikerült megtörnie a szöveget, 
+            ezért a kulcsok próbálgatásának a leállítását valamihez hozzá kell kötnünk. Itt jön be a képbe a <function>atlagos_szohossz</function> és 
+            a <function>tiszta_lehet</function> függvénypáros.
+        </para>
+        <para>
+            Az <function>atlagos_szohossz</function> végigmgy a titkos szövegen és számolja benne a szóközök számát majd a <function>titkos_meret</function>-et 
+            azaz a bemenet összes karakterének számát osztjuk a szóközök számával, azaz a vélt szavak számával. Ebből kapjuk meg a függvény doble típúsú visszatérési értékét.
+        </para>
+        <programlisting language="c"><![CDATA[
+        double
+atlagos_szohossz (const char *titkos, int titkos_meret)
+{
+  int sz = 0;
+  for (int i = 0; i < titkos_meret; ++i)
+    if (titkos[i] == ' ')
+      ++sz;
+
+  return (double) titkos_meret / sz;
+}
+            }]]></programlisting>
+            <para>
+            A <function>tiszta_lehet</function> függvény azt vizsgálja, hogy a szövegben megjelenik-e négy gyakori magyar szó amelyek a 
+            "hogy", "nem", "az" és a "ha". Amennyiben az átlagos szóhossz megfelel a kritériumnak, azaz 6 és 9 között van ami az átlag magyar szóhossz 
+            és tartalmazza a gyakori magyar szavakat akkor jó eséllyel sikerült a programnak megtalálnia a kulcsot.
+        </para>
+        <programlisting language="c"><![CDATA[
+        int
+tiszta_lehet (const char *titkos, int titkos_meret)
+{
+  // a tiszta szoveg valszeg tartalmazza a gyakori magyar szavakat
+  // illetve az átlagos szóhossz vizsgálatával csökkentjük a
+  // potenciális töréseket
+
+  double szohossz = atlagos_szohossz (titkos, titkos_meret);
+
+  return szohossz > 6.0 && szohossz < 9.0
+    && strcasestr (titkos, "hogy") && strcasestr (titkos, "nem")
+    && strcasestr (titkos, "az") && strcasestr (titkos, "ha");
+
+}]]></programlisting>
+
+        <para>
+            A <function>exor_tores</function> meghívja az <function>exor</function>-t és a tiszta lehet értékével tér vissza.
+        </para>
+        <programlisting language="c"><![CDATA[
+        int
+exor_tores (const char kulcs[], int kulcs_meret, char titkos[],
+	    int titkos_meret)
+{
+
+  exor (kulcs, kulcs_meret, titkos, titkos_meret);
+
+  return tiszta_lehet (titkos, titkos_meret);
+
+}
+]]></programlisting>
+        <para>
+            Már csak a fő programunk maradt ki a sorból. Az egyik legfontosabb teendőnk a megfelelő karakter-ek kiválasztása amelyekből kulcsot tudunk generálni. Én úgy módosítottam 
+            a programot, hogy ugye 4 karakteres kulcsot tudjon törni és az ABC-met az előző feladatokban használt kulcshoz igazítottam.
+            Egy while ciklussal beolvassuk a titkosított szöveget ezután ha még maradt hely a bufferban 
+            akkor egy for ciklussal azt kinullázzuk. Ezután történik a kulcsok generálása, azaz ebben az esetben négy for ciklussal végigmegyünk a karakterkészlet minden elemén, 
+            esetünkben ez maximum 256 kombinációt jelent. Ha ellőállt egy kulcs akkor meghívjuk az <function>exor_tores</function>-t ami a <function>tiszta_lehet</function> 
+            értékével tér vissza. Ha igaz a visszatérési értéke a program kiírja a kulcsot és a tiszta szöveget, ha hamis akkor újra exorozunk, hogy az eredeti titkos szöveggel lehessen tovább 
+            dolgozni és ne kelljen másik buffert hazsnálni.
+        </para>
+        <programlisting language="c"><![CDATA[
+        int
+main (void)
+{
+
+  char kulcs[KULCS_MERET];
+  char titkos[MAX_TITKOS];
+  char betuk[5] = {'m','k','a','i','\0'};
+  char *p = titkos;
+  int olvasott_bajtok;
+
+  // titkos fajt berantasa
+  while ((olvasott_bajtok =
+	  read (0, (void *) p,
+		(p - titkos + OLVASAS_BUFFER <
+		 MAX_TITKOS) ? OLVASAS_BUFFER : titkos + MAX_TITKOS - p)))
+    p += olvasott_bajtok;
+
+  // maradek hely nullazasa a titkos bufferben  
+  for (int i = 0; i < MAX_TITKOS - (p - titkos); ++i)
+    titkos[p - titkos + i] = '\0';
+
+  // osszes kulcs eloallitasa
+  for (int ii = 0; ii <= 4; ++ii)
+    for (int ji = 0; ji <= 4; ++ji)
+      for (int ki = 0; ki <= 4; ++ki)
+		for (int pi = 0; pi <= 4; ++pi)
+		  {
+		    kulcs[0] = betuk[ii];
+		    kulcs[1] = betuk[ji];
+		    kulcs[2] = betuk[ki];
+        kulcs[3] = betuk[pi];
+
+		    if (exor_tores (kulcs, KULCS_MERET, titkos, p - titkos))
+		      printf
+			      ("Kulcs: [%c%c%c%c]\nTiszta szoveg: [%s]\n",
+			      ii, ji, ki, pi, titkos);
+
+		    // ujra EXOR-ozunk, igy nem kell egy masodik buffer  
+		    exor (kulcs, KULCS_MERET, titkos, p - titkos);
+		  }
+
+  return 0;
+}
+
+]]></programlisting>
+
+    </section>        
+    <section>
+        <title>4.5 Neurális OR, AND és EXOR kapu</title>
+        <para>
+            R
+        </para>
+        <para>
+            Megoldás videó: <link xlink:href="https://youtu.be/Koyw6IH5ScQ">https://youtu.be/Koyw6IH5ScQ</link>
+        </para>
+        <para>
+            Megoldás forrása: <link xlink:href="https://gitlab.com/nbatfai/bhax/tree/master/attention_raising/NN_R">https://gitlab.com/nbatfai/bhax/tree/master/attention_raising/NN_R</link>               
+        </para>
+        <para>
+          Tanulságok, tapasztalatok, magyarázat...
+        </para>
+        <para>
+        <link xlink:href="https://www.youtube.com/watch?v=qv6UVOQ0F44">Egy nagyon jó szemléltető videó</link>
+        </para>
+        <para>
+             A neurális háló egy nagyon érdekes de nem könnyű téma. Itt az első bekezdésben röviden bemutatnám miről is van szó.
+             Egy neurális háló 2 főbb dologból áll: neuronokból és rétegekből. A neuronok lényege hogy a kapott adatokat továbbítani vagy 
+             módosítani legyenek képesek. A neuronoknak van egy bemeneti oldala, itt a bejövő adatokat szummázza illetve van egy kimeneti oldala. 
+             A valódi idegsjtekben a "bemeneti" adatok axonokon keresztül érkeznek, az axonok által összekötött idegsejtek pedig a neuron hálózatot
+             alakítják ki, ehhez hasonlóan működnek a programozásbeli neurális halózatok is, ezeket gráffal tudjuk szemléltetni. 
+             A neuronok tehát adatokat kapnak és azokat továbbítják.  Ez a kapcsolat alakítja ki a rétegeket. 3 fő rétegből szoktak állni a neurális 
+             hálózatok, ezek a bemeneti, a rejtett és a kimeneti réteg. Rejtett rétegből lehet több, vagy akár egy sem, minél több rejtett rétegből áll
+             egy hálózat annál komplexebb feladatokat képes végrehajtani. A rejtett réteget lehet műveleti rétegnek is nevezni, ahogy ezt sejteni lehet 
+             itt a kapott adatokkal a neuronok műveleteket végeznek, ezek  leggyakrabban a legalapabb logikai műveletek, azaz OR, AND, XOR stb. 
+             Léteznek úgy nevezett deep learning neural network-ök, ezeknek a lényege az hogy a neurális hálózatunkhoz, egy "reward system"-et azaz jutalmazási
+             rendszert adunk, ezek a hálózatok sok lefutás, generáción keresztül tanulnak, a folyamatosan érkező adatokat feldolgozzák. Minél pontosabb
+             reward systemet alakítunk ki annál hatékonyabb lesz a tanulási folyamata.
+        </para>
+        <para>
+            Na de térjünk is rá a neurális OR, AND és XOR kapukra. Ezekhez 2 db input szükséges, az egyik lgyen A a másik pedig B. Az input 
+            módosítás nélül adja tovább az adatokat. Az OR és az And esetén nincs rejtett rétegünk, ezek elemi logikai műveletek. Ahhoz hogy a 
+            neurális hálónkat ezek elvégzésére megtanítsuk egy <function>data.frame</function> táblára van szükségünk, iletve a <function>neuralnet()</function> függvényre. 
+            Ez azt jelenti, hogy a <function>data.frame</function>-ben megadjuk neki az inputokat és a művelet elvégzése utáni eredményt, pédát mutatunk be.
+        </para>
+        <para>
+            Az AND és az OR műveleteket, rejtett réteg bélkül is el tudja végezni, akár a kettőt is egyszerre, de az XOR, azaz a kizáró vagy esetén más
+            a helyzet. Ha ítéletlogikai formulaként felírjuk láthatjuk hogy egy sokkal összetettebb formuláról van szó, míg az AND egy elemi konjunkciónak
+            felel meg az OR pedig ugye elemi diszjunkciónak. Az XOR-hoz 3 rejtett rétegre lesz szükségünk.
+        </para>
+        <para>
+            A program kimenete:
+            <screen>$neurons
+$neurons[[1]]
+       a1 a2
+[1,] 1  0  0
+[2,] 1  1  0
+[3,] 1  0  1
+[4,] 1  1  1
+
+
+$net.result
+            [,1]
+[1,] 0.001417152
+[2,] 0.999410346
+[3,] 0.999027936
+[4,] 0.999999999
+
+dev.new(): using pdf(file="Rplots1.pdf")
+$neurons
+$neurons[[1]]
+       a1 a2
+[1,] 1  0  0
+[2,] 1  1  0
+[3,] 1  0  1
+[4,] 1  1  1
+
+
+$net.result
+             [,1]         [,2]
+[1,] 1.055632e-07 2.947572e-09
+[2,] 1.000000e+00 1.324911e-03
+[3,] 9.999999e-01 1.366027e-03
+[4,] 1.000000e+00 9.983784e-01
+
+dev.new(): using pdf(file="Rplots2.pdf")
+$neurons
+$neurons[[1]]
+       a1 a2
+[1,] 1  0  0
+[2,] 1  1  0
+[3,] 1  0  1
+[4,] 1  1  1
+
+
+$net.result
+          [,1]
+[1,] 0.4999967
+[2,] 0.4999991
+[3,] 0.4999993
+[4,] 0.5000017
+
+dev.new(): using pdf(file="Rplots3.pdf")
+$neurons
+$neurons[[1]]
+       a1 a2
+[1,] 1  0  0
+[2,] 1  1  0
+[3,] 1  0  1
+[4,] 1  1  1
+
+$neurons[[2]]
+     [,1]       [,2]      [,3]       [,4]         [,5]       [,6]       [,7]
+[1,]    1 0.68636693 0.6092020 0.91035646 7.497751e-01 0.15431004 0.01945436
+[2,]    1 0.99953772 0.6563290 0.90095274 2.772957e-03 0.63049301 0.52359387
+[3,]    1 0.02439443 0.2006083 0.01702437 3.355866e-03 0.00140767 0.05089230
+[4,]    1 0.96109643 0.2351460 0.01527601 3.124725e-06 0.01301067 0.74813172
+
+$neurons[[3]]
+     [,1]       [,2]      [,3]      [,4]       [,5]
+[1,]    1 0.84563624 0.4130953 0.9529117 0.03482577
+[2,]    1 0.22458384 0.1289220 0.1237234 0.99612886
+[3,]    1 0.04217722 0.1161074 0.3859107 0.99282199
+[4,]    1 0.92886172 0.8664505 0.9441624 0.99974822
+
+$neurons[[4]]
+     [,1]      [,2]       [,3]      [,4]      [,5]      [,6]       [,7]
+[1,]    1 0.9927132 0.02167383 0.9761821 0.9940454 0.1324945 0.06255539
+[2,]    1 0.1816136 0.81633663 0.2088652 0.2107308 0.5750897 0.78446193
+[3,]    1 0.1858673 0.75709052 0.3026211 0.1862775 0.5130758 0.74301901
+[4,]    1 0.9538813 0.06213487 0.8851530 0.9619660 0.1685140 0.08461656
+
+
+$net.result
+             [,1]
+[1,] 0.0003216646
+[2,] 0.9997287272
+[3,] 0.9994604261
+</screen>
+        </para>
+
+
+        <programlisting language='r'>
+        <![CDATA[
+library(neuralnet)
+
+a1    <- c(0,1,0,1)
+a2    <- c(0,0,1,1)
+OR    <- c(0,1,1,1)
+
+or.data <- data.frame(a1, a2, OR)
+
+nn.or <- neuralnet(OR~a1+a2, or.data, hidden=0, linear.output=FALSE, stepmax = 1e+07, threshold = 0.000001)
+
+plot(nn.or)
+
+compute(nn.or, or.data[,1:2])]]>
+        </programlisting>
+
+        <figure>
+            <title>Az OR művelet</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/Rplots-1.png" scale="30" />
+                </imageobject>
+                <textobject>
+                    <phrase></phrase>
+                </textobject>
+            </mediaobject>
+        </figure> 
+
+<programlisting language='r'>
+        <![CDATA[
+a1    <- c(0,1,0,1)
+a2    <- c(0,0,1,1)
+OR    <- c(0,1,1,1)
+AND   <- c(0,0,0,1)
+
+orand.data <- data.frame(a1, a2, OR, AND)
+
+nn.orand <- neuralnet(OR+AND~a1+a2, orand.data, hidden=0, linear.output=FALSE, stepmax = 1e+07, threshold = 0.000001)
+
+plot(nn.orand)
+
+compute(nn.orand, orand.data[,1:2])]]>
+        </programlisting>
+        <figure>
+            <title>Az AND és OR művelet</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/Rplots1-1.png" scale="30" />
+                </imageobject>
+                <textobject>
+                    <phrase></phrase>
+                </textobject>
+            </mediaobject>
+        </figure> 
+
+<programlisting language='r'>
+        <![CDATA[
+a1      <- c(0,1,0,1)
+a2      <- c(0,0,1,1)
+EXOR    <- c(0,1,1,0)
+
+exor.data <- data.frame(a1, a2, EXOR)
+
+nn.exor <- neuralnet(EXOR~a1+a2, exor.data, hidden=0, linear.output=FALSE, stepmax = 1e+07, threshold = 0.000001)
+
+plot(nn.exor)
+
+compute(nn.exor, exor.data[,1:2])]]>
+        </programlisting>
+
+        <figure>
+            <title>Az EXOR rejtett rétegek nélkül művelet</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/Rplots2-1.png" scale="30" />
+                </imageobject>
+                <textobject>
+                    <phrase></phrase>
+                </textobject>
+            </mediaobject>
+        </figure> 
+<programlisting language='r'>
+        <![CDATA[
+a1      <- c(0,1,0,1)
+a2      <- c(0,0,1,1)
+EXOR    <- c(0,1,1,0)
+
+exor.data <- data.frame(a1, a2, EXOR)
+
+nn.exor <- neuralnet(EXOR~a1+a2, exor.data, hidden=c(6, 4, 6), linear.output=FALSE, stepmax = 1e+07, threshold = 0.000001)
+
+plot(nn.exor)
+
+compute(nn.exor, exor.data[,1:2])
+]]>
+        </programlisting>
+
+        <figure>
+            <title>Az EXOR rejtett rétegekkel művelet</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/Rplots3-1.png" scale="30" />
+                </imageobject>
+                <textobject>
+                    <phrase></phrase>
+                </textobject>
+            </mediaobject>
+        </figure> 
+    </section>
+    <section>
+      <title>Vörös pipacs pokol/Írd ki mit lát Steve!</title>
+      <para>
+        Megoldás videó: <link xlink:href="https://www.youtube.com/watch?v=DX8dI04rWtk">https://www.youtube.com/watch?v=DX8dI04rWtk</link>
+      </para>
+      <para>
+        Aki szokott a Minecrafttal játszani az biztosan tudja, hogy ha a karakterünkkek szeretnénk valamit csinálni, építeni, vagy blokkokat kiütni, 
+        bányászni, rá kell vinnünk az ablak közepén látható célkeresztet arra a blokkra amelyikkel dolgozni akarunk. Az F3+B billentyű kombinációval 
+        a játékon belül láthatjuk hogy minden egyes élőlénynek a játékban hova mutat a kis keresztje. Egy vonal jelenik meg ami azt mutatja meg, hogy egy játékos vagy 
+        élőlény ha egyenes vonalban néz akkor mire néz éppen. A Malmö programozás során ennek nagy jelentősége volt mivel mindig el 
+        kellett érnünk, hogy Steve a virágra nézzen mivel akkor tudja kiütni. Ehhez változtatnunk kell esetleg a fej tartását, vagy azt hogy milyen szögben néz. 
+        Lekövetni pedig ezt a <function>LineOfSight</function>-tal tufdjuk. A <function>Line</function> arra az egyenes vonalra utal amire mutat éppen Steve keresztje.
+        Megadjuk hogy a <function>self.lookingat</function> legyen a <function>LineOfSight</function> és a kiíratásnál a <function>self.lookingat</function>-re hivatkozunk. 
+      </para>
+      <programlisting><![CDATA[
+if "LineOfSight" in observations:
+                    LineOfSight = observations["LineOfSight"]
+                    self.lookingat = LineOfSight["type"]
+                    print("    Steve's <): ", self.lookingat)
+
+        ]]></programlisting>
+        <para>
+        A kiíratásnál egyszerűen a <function>self.lookingat</function> aktuális értékét kell figyelembe vennünk, ha ez <function>red_flower</function> akkor 
+        Steve reagáljon rá annyit, hogy kiírja <function>VIRAAAG!</function>, de egyébként az előző kódcsipetben látható kiíratás folyamatosan frissül, mindig azt mutatja 
+        amire Steve aktuálisan néz.
+      </para>
+      <programlisting><![CDATA[
+        if self.lookingat == "red_flower": #itt talalkozik a viraggal meg fel is veszi
+                            print("     VIRAAAG!")
+
+        ]]></programlisting>
+    </section>
+        
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+</chapter>                

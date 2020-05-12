@@ -1,0 +1,922 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+    <info>
+        <title>Helló, Conway!</title>
+        <keywordset>
+            <keyword/>
+        </keywordset>
+    </info>
+   <!-- <section>
+        <title>8.1 Hangyaszimulációk</title>
+        <para>
+            Írj Qt C++-ban egy hangyaszimulációs programot, a forrásaidról utólag reverse engineering jelleggel
+            készíts UML osztálydiagramot is!
+        </para>
+        <para>
+            Megoldás videó: <link xlink:href="https://bhaxor.blog.hu/2018/10/10/myrmecologist">https://bhaxor.blog.hu/2018/10/10/myrmecologist</link>
+        </para>
+        <para>
+            Megoldás forrása: <link xlink:href=""></link>               
+        </para>
+        <para>
+            Ebben a feladatban egy hangyaszimulációs programot vizsgálunk. Ahhoz, hogy megértsük működésének alapjait,
+            ismernünk kell a valódi hangyák viselkedését is. Nekem egy rövid ideig, volt egy kb 30 hangyából álló apró 
+            hangyakolóniám, sajnos a felelőtlenségem miatt elpusztultak (nem megfelő ételt adtam nekik) de addig is picit 
+            beleláttam, hogy hogyan élnek együtt. A hangyák úgynevezett kolónitudattal élnek, egy-egy példánynak esélye sincs 
+            egyedül túlélni, nagyon szorosan egymásra vannak utalva, gyakorlatilag a kolóniára úgy kell tekintenünk mint egy 
+            állatra, mikor ettettem a hangyáimat akkor is ezt a szempontot kellett szem előtt tartani, hogy úgy adjak nekik 
+            élelmet, hogy az a teljes bolynak elég legyen. A valóságtól való első számú különbség a szimulációs programban, 
+            hogy itt a hangyabolyban nincs királynő, pedig egyébként ténylegesen ő a hangyaboly legfontosabb eleme, tehát ha 
+            ő elpusztul a boly nem tud túlélni, elsősorban amiatt hogy csak a királynő tud petéket lerakni, de egyébként sem 
+            tudnak királynő nélkül élni.
+        </para> 
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/hangya.png" format="PNG" scale="20" />
+            </imageobject>
+        </mediaobject> 
+        <para>
+            Maga program egyébként 5 db C++ kódból és 4 db headerből áll. Nem fogom mindet részletesen bemutatni, mert nekem is 
+            feleslegesen sok munka lenne és az olvasót sem szeretném untatni, szóval a számomra érdekesebb részekről fogok írni.
+            Mivel GUI-cal szeretnénk megjeleníteni a programot, ezrt ismét a Qt-t hívtuk segítségül, végül sikerült ezt a Linux 
+            Mint-emen is megoldani és a qmake make parancsok majd a "myrmecologist" futtatása után szépe kirajzolódott a hangyabolyom.
+            Az ablakban a következőket láthatjuk: a pici mozgó négyzetek nyílván a hanygáink, ezek zöld szálakat húznak maguk után, 
+            ezek a maguk mögött hagyott feromon nyomok, ezek alapján tudnak megfelően mozogni, és láthatóan egy nagy rácshálót, ami 
+            az egész programablakot beteríti. Ez a rács szerintem rendkívűl zavarja a szemet és az ember nem szívesen nézi így perceken
+            át a hangyákat szóval én azt világosszürkére állítottam, látható az alábbi, antwin.cpp-ből kódcsipetben, a QPaintEvent felel 
+            ugyanis a megjelenítésért.
+        </para>  
+
+        <programlisting language='c++'>
+            <![CDATA[
+            void AntWin::paintEvent ( QPaintEvent* )
+{
+    QPainter qpainter ( this );
+
+    grid = grids[gridIdx];
+
+    for ( int i=0; i<height; ++i ) {
+        for ( int j=0; j<width; ++j ) {
+
+            double rel = 255.0/max;
+
+            qpainter.fillRect ( j*cellWidth, i*cellHeight,
+                                cellWidth, cellHeight,
+                                QColor ( 255 - grid[i][j]*rel, //255 volt mindhárom
+                                         255,
+                                         255 - grid[i][j]*rel) );
+
+            if ( grid[i][j] != min )
+            {
+                qpainter.setPen (
+                    QPen (
+                        QColor ( 255 - grid[i][j]*rel,          //255
+                                 255 - grid[i][j]*rel, 255),
+                        1 )
+                );
+
+                qpainter.drawRect ( j*cellWidth, i*cellHeight,
+                                    cellWidth, cellHeight );
+            }
+
+
+
+            qpainter.setPen (
+                QPen (
+                    QColor (150,150,150 ), //0,0,0
+                    1 )
+            );
+
+            qpainter.drawRect ( j*cellWidth, i*cellHeight,
+                                cellWidth, cellHeight );
+
+        }
+    }
+        ]]>
+        </programlisting>  
+
+        <para>
+            Az antwin.cpp-ben ebben a kódrészletben van egyébként nagyon sok dolog ami a GUI megjelenítésért felel. Mos más dolgunk 
+            nem igazán volt a Qt-vel, nincs mouseMove Event stb. Mivel ez egy szimuláció, nyílván nem interaktív. 
+        </para>  
+
+        <para>
+            A programunkban tehát jelenleg csak dolgozókkal találkozunk és az ő mozgásukat tudjuk megfigyelni. Ha elindítottuk 
+            a programot, akkor láthatjuk, hogy különböző pontokon jelennek meg a hangyáink, ahhoz hogy így induljon el a program 
+            és ne egy pontban jelenjen meg az összes hangya, a main.cpp-ben a qsrand függvény segítségére volt szükség, erről 
+            teszek is ide egy kódcsipetet. Fontos ugye, hogy ne egy helyen jöjjenek létre.
+        </para>   
+        <programlisting language='c++'>
+            <![CDATA[
+            qsrand ( QDateTime::currentMSecsSinceEpoch() );
+        ]]>
+        </programlisting>  
+     
+
+
+    </section>        
+    <section>
+        <title>8.2 Java életjáték</title>
+        <para>
+            Írd meg Java-ban a John Horton Conway-féle életjátékot, 
+            valósítsa meg a sikló-kilövőt!
+        </para>
+        <para>
+            Megoldás videó: 
+        </para>
+        <para>
+            Megoldás forrása: <link xlink:href=""></link>               
+        </para>
+        <para>
+            A játékot John Horton Conway. Cambridge-i matematikus alkotta meg. A játék egy sejtautomata.
+            A lényege az hogy, szimulálja a sejtek életét, egyszerű szabályok meghatározásával. Maga a "játékmenet"
+            egyébként eléggé passzív, a játkosnak annyi dolga van, hogy az első generációni sejtet ő helyezi el a rácshálón 
+            majd figyeli mi történik velük.
+        </para> 
+        <para>
+            Mivel a következő feladat is ugyanerről az életjátékról szól csak C++ megvalósításban arra gondoltam, hogy a 
+            játékról magáról itt írok bővebben, a következő feladatban pedig inkább a kódot vizsgáljuk. Szóval ismerjük is 
+            meg a szabályokat!
+        </para>
+        <para>
+            A sejtek a rácshálóban egy 8 rácspontnyi távolságban tudnak "érzékeéni". Ez azért fontos mert egy sejt önmagában 
+            elpusztul, szüksége van más sejtekre is a környezetében, ezeknek a száma 2 és 3 lehet, a közvetlen szomszédságában. 
+            Tehát 1 sejt 1 szomszéddal elpusztul de ha 3-nál több szomszédja van, akkor már "túlszaporodtak" és megint elpusztul 
+            az a sejt amelynek több szomszédja van. Új sejt születik akkor ha egy sejtnek pontosan 3 szomszédja van. a játék körökre, 
+            generációkra bontható, és minden generáció változásait vizsgálhatjuk. A játék szabályai ilyen egyszerűek mégis nagyon 
+            összetett dolgokkal találkozhatunk.
+        </para>
+        <para>
+            A játék során kialakulhatnak úgynevezett stabil alakzatok,  ilyen például egy egyszerű négyzet amely 4 db sejtből áll, 
+            ekkor minden sejtnek 3 szomszédja van tehát túlélik a kört. Az egyik leghíresebb azakzat az a "sikló" amely átlósan 
+            tud mozogni is, iletve a vízszintesen mozgó űrhajó. Ezek olyan alakzatok amelyek idővel "mozgásuk során" önmagukba 
+            alakulnak vissza. Csatolok is róluk ided egy képet, arról mikor futattam ezt a programt:
+        </para>
+
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/java_gof.png" format="PNG" scale="20" />
+            </imageobject>
+        </mediaobject> 
+
+        <para>
+            Fontosnak tartom mgejegyezni, hogy olyan lakzatok is kirajzolódhatnak a játék futása során amelyek természetes jelenségekre 
+            hasonlítanak. Ilyen pl.: egy furcsa tintapaca szerű nagyjából összefüggő alak, az ilyen jellegű mintákat sok helyen tudják 
+            hasznosítani, ilyen lehet mondjuk a barlagok generálása is, aminél ezt egyébként nagyon gyakran alkalmazzák is.
+        </para>
+        <para>
+            Na és ha már java, nem hagyhatom ki hogy megmutassam miket találtam, a youtube-on. Több minecraftos megvalósítása is 
+            létezik ennek a játéknak, mégpedig úgy, hogy a 3D-s térben zajlanak ezek az események.
+        </para>
+        <para>
+            Minecraft 3D <link xlink:href="https://www.youtube.com/watch?v=wNypW-aSCmE">https://www.youtube.com/watch?v=wNypW-aSCmE</link>               
+        </para>
+
+
+    </section>    -->    
+
+
+    <section>
+        <title>Qt C++ életjáték</title>
+        <para>
+            Most Qt C++-ban!
+        </para>
+        
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref ="./img/sejtauto.png" format="PNG" scale="20" />
+            </imageobject>
+        </mediaobject> 
+
+        <para>
+            Megoldás forrása: <link xlink:href=""></link>               
+        </para>
+        <para>
+            A játékot John Horton Conway, Cambridge-i matematikus alkotta meg. A játék egy sejtautomata.
+            A lényege az hogy, szimulálja a sejtek életét, egyszerű szabályok meghatározásával. Maga a "játékmenet"
+            egyébként eléggé passzív, a játkosnak annyi dolga van, hogy az első generációnyi sejtet ő helyezi el a rácshálón 
+            majd figyeli mi történik velük. Nézzük meg a játék szabályait!
+        </para> 
+        <para>
+            A sejtek a rácshálóban egy 8 másik rácspontot tudnak "érzékelni", ezek a szomszédjaik. Ez azért fontos mert egy sejt önmagában 
+            elpusztul, szüksége van más sejtekre is a környezetében, ezeknek a száma 2 és 3 lehet, a közvetlen szomszédságában. 
+            Tehát 1 sejt 1 szomszéddal elpusztul de ha 3-nál több szomszédja van, akkor már "túlszaporodtak" és megint elpusztul. 
+            Új sejt születik akkor ha egy sejtnek pontosan 3 szomszédja van. A játék körökre, 
+            generációkra bontható, és minden generáció változásait vizsgálhatjuk. A játék szabályai ilyen egyszerűek mégis nagyon 
+            összetett dolgokkal találkozhatunk.
+        </para>
+        <para>
+            A játék során kialakulhatnak úgynevezett stabil alakzatok,  ilyen például egy egyszerű négyzet amely 4 db sejtből áll, 
+            ekkor minden sejtnek 3 szomszédja van tehát túlélik a kört. Az egyik leghíresebb azakzat az a "sikló" amely átlósan 
+            tud "mozogni", iletve a vízszintesen mozgó űrhajó. Ezek olyan alakzatok amelyek idővel "mozgásuk során" önmagukba 
+            alakulnak vissza. Csatolok is róluk ide egy képet, arról mikor futattam ezt a programt:
+        </para>
+        <para>
+            A program maga két header-ből és három <function>.cpp</function> fájlból áll. A header fájlok a <command>sejtszal.h</command> és a <command>sejtablak.h</command>, 
+            ezekben hozzuk létre a <function>SejtSzal</function> és <function>SejtAblak</function> osztályokat illetve deklaráljuk a szükséges változókat. Először a <command>sejtszal.cpp</command> 
+            programot szeretném kicsit részletesebben bemutatni. 
+        </para> 
+        <para>
+            A <command>sejtszal.cpp</command> elején találjuk a <function>SejtSzal</function> konstruktort és láthatjuk hogy elkéri a számításokhoz szükséges változókat.
+        </para>  
+        <programlisting language='c++'>
+            <![CDATA[
+    SejtSzal::SejtSzal(bool ***racsok, int szelesseg, int magassag, int varakozas, SejtAblak *sejtAblak)
+{
+    this->racsok = racsok;
+    this->szelesseg = szelesseg;
+    this->magassag = magassag;
+    this->varakozas = varakozas;
+    this->sejtAblak = sejtAblak;
+
+    racsIndex = 0;
+}
+        ]]>
+        </programlisting> 
+        <para>
+            Ezután az adott sejt szomszédjainak állapotát meghatározó függvényt láthatjuk, azaz a <function>szomszedokSzama</function>-t, ez a függvény egy adott sejt környezetét vizsgálja, 
+            és az "ELO" állapotú szomszédok számával tér vissza. Egy adott sejt szomszédjainak állapotát a rácshálóban úgy tudjuk megvizsgálni, hogy egy 3x3-mas mátrix környezetet nézünk 
+            amely ugye összesen 9 elem, ebből a középső lesz az éppen vizsgált sejt, az ő környezetében lévő 8 sejt állapotát szeretnénk mindig meghatározni.
+        </para>  
+        <programlisting language='c++'>
+            <![CDATA[
+    int SejtSzal::szomszedokSzama(bool **racs,
+                              int sor, int oszlop, bool allapot) {
+    int allapotuSzomszed = 0;
+    // A nyolcszomszedok vegigzongorazasa:
+    for(int i=-1; i<2; ++i)
+        for(int j=-1; j<2; ++j)
+            // A vizsgalt sejtet magat kihagyva:
+            if(!((i==0) && (j==0))) {
+        // A sejtterbol szelenek szomszedai
+        // a szembe oldalakon ("periodikus hatarfeltetel")
+        int o = oszlop + j;
+        if(o < 0)
+            o = szelesseg-1;
+        else if(o >= szelesseg)
+            o = 0;
+
+        int s = sor + i;
+        if(s < 0)
+            s = magassag-1;
+        else if(s >= magassag)
+            s = 0;
+
+        if(racs[s][o] == allapot)
+            ++allapotuSzomszed;
+    }
+
+    return allapotuSzomszed;
+} 0;
+}
+        ]]>
+        </programlisting> 
+
+        <para>
+            A következő programrészlet egy eljárás lesz amiben összehasonlítjuk az aktuális mátrixot az egy generációval őt megelelőzővel. 
+            Igazából itt vannak definiálva az életjáték szabályai is, itt határozza meg a program hogy hogy alakul ki a következő generáció.
+            Fontos hogy ugye két mátrixot használ a program mivel olyan helyen nem jöhet létre élő sejt ahol az adott körben halott sejt van.
+        </para>  
+        <programlisting language='c++'>
+            <![CDATA[
+        void SejtSzal::idoFejlodes() {
+
+    bool **racsElotte = racsok[racsIndex];
+    bool **racsUtana = racsok[(racsIndex+1)%2];
+
+    for(int i=0; i<magassag; ++i) { // sorok
+        for(int j=0; j<szelesseg; ++j) { // oszlopok
+
+            int elok = szomszedokSzama(racsElotte, i, j, SejtAblak::ELO);
+
+            if(racsElotte[i][j] == SejtAblak::ELO) {
+                /* Elo elo marad, ha ketto vagy harom elo
+             szomszedja van, kulonben halott lesz. */
+                if(elok==2 || elok==3)
+                    racsUtana[i][j] = SejtAblak::ELO;
+                else
+                    racsUtana[i][j] = SejtAblak::HALOTT;
+            }  else {
+                /* Halott halott marad, ha harom elo
+             szomszedja van, kulonben elo lesz. */
+                if(elok==3)
+                    racsUtana[i][j] = SejtAblak::ELO;
+                else
+                    racsUtana[i][j] = SejtAblak::HALOTT;
+            }
+        }
+    }
+    racsIndex = (racsIndex+1)%2;
+}
+
+        ]]>
+        </programlisting>
+        <para>
+            Mivel nem akarunk véget vetni a játékmenetnek ezért azt egy végtelen while ciklusban futtatjuk. A <command>sejtszal.cpp</command> utolsó eleme pedig
+            a <function>SejtSzal</function> destrukora.
+        </para>  
+        <programlisting language='c++'>
+            <![CDATA[
+        void SejtSzal::run()
+{
+    while(true) {
+        QThread::msleep(varakozas);
+        idoFejlodes();
+        sejtAblak->vissza(racsIndex);
+    }
+
+}
+SejtSzal::~SejtSzal()
+{
+}
+        ]]>
+        </programlisting>
+        <para>
+            A következő amivel foglalkozni szeretnék az a <command>sejtablak.cpp</command>, ebben készül el a programablakunk. Az első dolog amivel találkozunk az 
+            a <function>SejtAblak</function> konstruktor, azon pedig tartalmazza a programablak nevének kiírása. Ezután elkérjük a <function>SejtAblak</function> osztélyban deklarált 
+            <function>magassag</function> és <function>szelesseg</function> változókat, ezután pedig értéket adunk a <function>cellaMagassag</function> és <function>cellaSzelesseg</function> 
+            véltozóknak, mindkettő 6 lesz mivel négyzeteket szeretnénk kialakítani. Magának a játék felületének a mérete ezek szorzatából fog kialakulni, ugyanis a <function>magassag</function> 
+            és <function>szelesseg</function> értékekre úgy kell tekintenünk hogy 1 cellányi egységben számoljuk őket. Ezután pedig helyet foglalunk a két rácsunknak amelyek a már korábban 
+            említett mátrixaink lesznek majd beállítjuk, hogy először minden sejt halott legyen a játék kezdetén és csak ezután hívjuk meg a siklókilövőt amivl ugye indul a játék. 
+            Ezek voltak a játék előkészületei, mostmár meghívhatjuk a  <function>start()</function> függvényt ami el is indítja.
+        </para>  
+        <programlisting language='c++'>
+            <![CDATA[
+        SejtAblak::SejtAblak(int szelesseg, int magassag, QWidget *parent)
+: QMainWindow(parent)
+{
+  setWindowTitle("A John Horton Conway-fele eletjatek");
+
+  this->magassag = magassag;
+  this->szelesseg = szelesseg;
+
+
+  cellaSzelesseg = 6;
+  cellaMagassag = 6;
+
+  setFixedSize(QSize(szelesseg*cellaSzelesseg, magassag*cellaMagassag));
+
+  racsok = new bool**[2];
+  racsok[0] = new bool*[magassag];
+  for(int i=0; i<magassag; ++i)
+    racsok[0][i] = new bool [szelesseg]; //mátrixot hoz létre
+  racsok[1] = new bool*[magassag];
+  for(int i=0; i<magassag; ++i)
+    racsok[1][i] = new bool [szelesseg];
+
+  racsIndex = 0;                
+  racs = racsok[racsIndex];  
+
+  // A kiindulo racs minden cellaja HALOTT
+  for(int i=0; i<magassag; ++i)
+    for(int j=0; j<szelesseg; ++j)
+      racs[i][j] = HALOTT;
+    // A kiindulo racsra "ELOlenyeket" helyezunk
+    //siklo(racs, 2, 2);
+
+    sikloKilovo(racs, 5, 60);  //itt hívja meg a siklókilövőt
+
+  eletjatek = new SejtSzal(racsok, szelesseg, magassag, 120, this);
+
+  eletjatek->start();
+
+        ]]>
+        </programlisting>
+
+        <para>
+            A <function>paintEvent()</function> függvénnyel történik a rács frissítése, újrarajzolása, illtve az "ELO" 
+            állapotú sejtek cellájának színezése is. Ide szúrnám be a <function>vissza</function> eljárást is mivel ő hívja meg mindig újból a <function>paintEvent()</function>-et.
+        </para>  
+        <programlisting language='c++'>
+            <![CDATA[
+        void SejtAblak::paintEvent(QPaintEvent*) {
+  QPainter qpainter(this);
+
+  // Az aktualis
+  bool **racs = racsok[racsIndex];
+  // racsot rajzoljuk ki:
+  for(int i=0; i<magassag; ++i) { // vegig lepked a sorokon
+    for(int j=0; j<szelesseg; ++j) { // s az oszlopok
+      // Sejt cella kirajzolasa
+      if(racs[i][j] == ELO) //feltölti az adott színnel
+	qpainter.fillRect(j*cellaSzelesseg, i*cellaMagassag,
+			  cellaSzelesseg, cellaMagassag, Qt::black);
+	else
+	  qpainter.fillRect(j*cellaSzelesseg, i*cellaMagassag,
+			    cellaSzelesseg, cellaMagassag, Qt::white);
+	  qpainter.setPen(QPen(Qt::gray, 1));
+
+	qpainter.drawRect(j*cellaSzelesseg, i*cellaMagassag,
+			  cellaSzelesseg, cellaMagassag);
+    }
+  }
+
+  qpainter.end();
+}
+void SejtAblak::vissza(int racsIndex) //frissít
+{
+  this->racsIndex = racsIndex;
+  update(); // ő meghívja a paint eventet
+}
+        ]]>
+        </programlisting>
+        <para>
+            A programunk előre definiált élő sejtekkel indít, mégpedig egy siklókilövővel, ezt hívja meg a <function>SejtAblak</function> konstruktor. Viszont én most nem a 
+            siklókilövőt hanem a siklót akarom megmutatni, mivel ez picit talán rövidebb. Láthatjuk, hogy a megfelő rácsbeli celliánkra kell hivatkoznunk és azoknak egyszerűen "ELO" 
+            értéket állítunk be.
+        </para>  
+        <programlisting language='c++'>
+            <![CDATA[
+        void SejtAblak::siklo(bool **racs, int x, int y) {
+
+  racs[y+ 0][x+ 2] = ELO;
+  racs[y+ 1][x+ 1] = ELO;
+  racs[y+ 2][x+ 1] = ELO;
+  racs[y+ 2][x+ 2] = ELO;
+  racs[y+ 2][x+ 3] = ELO;
+
+}
+        ]]>
+        </programlisting>
+
+        <tip>
+              <title>Alternatív megoldás:</title>
+              <para>
+                  Ehhez a feladathoz készítettem egy alternatív megoldást is, mégpedig a Conway-féle életjáték Arduino megvalósítását.
+              </para>            
+            </tip>
+
+        <para>
+            Az ötlet onnan jött, hogy még január 
+            környékén sikerült beszereznem egy egész sokmindent tartalmazó arduino kit-et. Tehát bőven van mindenféle mikrokontrollerem, szenzorom, kijelzőm, majd amikor 
+            elérkeztem ehhez a feladathoz és láttam mennyire népszerű a dolog tudtam, hogy lesz arduino verziója is. És igazam is lett. A YouTube-on méghozzá elég 
+            sokféle változata van a dolognak, attól függőn milyen kijelzőt használnak. Nekem ez a 1602-es LCD megoldás tűnt a legegyszerűbbnek, de akad 8x8-as 
+            LEDmátrix verzió is. 
+        </para>  
+
+        <figure>
+            <title>Így néz ki az életjáték Arduinoval</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/arduino.jpg" scale="25" />
+                </imageobject>
+                <textobject>
+                    <phrase></phrase>
+                </textobject>
+            </mediaobject>
+        </figure> 
+
+        <warning>
+              <title>Az Arduino megoldás forrása:</title>
+              <para>
+                    A sejtautomata arduino megvalósításához <link xlink:href="https://www.youtube.com/watch?v=Gf8JKkiNYkE">ezt a videót</link>használtam, 
+                    megmutatták benne a kapcsolási rajzot illetve a kódot videóban élőben írták. Szerintem azért is nagyon jó videó mert nem csak az életjáték programját 
+                    mutatja meg hanem at LCD kijelző használatát is. 
+              </para>            
+        </warning> 
+
+        <figure>
+            <title>A leggyakoribb LCD bekötési mód amit én is követtem</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/arduino1.png" scale="80" />
+                </imageobject>
+                <textobject>
+                    <phrase></phrase>
+                </textobject>
+            </mediaobject>
+        </figure> 
+
+        <para>
+            Amiket felhasználtam az építés során:
+        </para> 
+        <itemizedlist>
+            <listitem>
+                <para>Arduino UNO (lehet más típúsú is)</para>                        
+            </listitem>
+            <listitem>
+                <para>1602-es LCD kijelző.</para>                        
+            </listitem>
+            <listitem>
+                <para>egy potméter</para>                        
+            </listitem>
+            <listitem>
+                <para>1 db 220 ohm-os ellenállás</para>                        
+            </listitem>
+            <listitem>
+                <para>kábelek</para>                        
+            </listitem>
+            <listitem>
+                <para>breadboard</para>                        
+            </listitem>        
+        </itemizedlist>
+
+        <tip>
+              <title>Megjegyzés:</title>
+              <para>
+                  A potméterrel tudjuk a kijelző fényerejét állítani.
+              </para>            
+            </tip>
+        
+
+        <para>
+            Az Arduinos megoldás esetében szerintem a legérdekesebb dolog az LCD kijelző használata. Ebből létezik többféle is, én egy 1602-eset használtam. A kijelző 
+            neve beszédes ugyanis arra utal hogy 16 oszlopos 2 soros mátrixból épül föl, ezek a mátrixok tartalmazáák a pixeleket mégpedig úgy, hogy egy-egy ilyen 
+            szekció 5 oszlopból és 8 sorból áll. Ebből a felületből a program összesen 20*16, azaz 320 pixelt használ fel. 
+        </para>  
+        <para>
+            Az Arduino mikrokontrollekreknek saját programozási nyelve van <command>ino</command> kiterjesztésű fájlokat értünk az Arduino programok alatt. Ezek 
+            egy <function>void setup()</function> előkészítésből és egy <function>void loop()</function>-ból állnak. A <function>void setup()</function> lényege, hogy 
+            előkészítjük magát a mikrokontollert a program futtatására, a <function>void loop()</function> 
+            pedig a főprogramunk lesz, ez ha belátható időn belül lefut akkor mindig újrakezdődik, illetve ha a megnyomjuk a "reset" gombot, akkor ezt a fő programot 
+            tudjuk az elejétől futtatni. 
+            Az <command>ino</command> programok esetén mindig az az első dolgunk, hogy felkészítjük az arduino-t arra, hogy milyen hardware-eket kell kezelnie, megmondjuk neki 
+            mely portokat kell használnia.
+            A nyelv maga C alapú, nagyon közel áll hozzá viszoönt vannak eltérések és sajátosságai, mint az előbb említett fő program is.
+        </para>
+        
+
+        <caution>
+              <title>Az ino kód forrása</title>
+              <para>
+                    A kódot a videó készítője nyílvánosan tette közzé és <link xlink:href="http://www.newthinktank.com/2018/10/arduino-8-conways-game-life/">ezen az oldalon</link> bárkinek 
+                    elérhető. Én nem fogom az egész programot végigrészletezni, a számomra érdekes, fontosnak tartott részeit szeretném kiemelni. Mielőtt nekiállunk Arduinot programozni 
+                    szerezzünk be egy <command>Arduino IDE</command> fejlesztői környzetet, ez azért fontos mert innen tudjuk feltölteni a kódunkat magára a mikrokontrollerre. 
+                    Ha meg akarjuk nyitni a fejlesztői környzetet, akkor ezt rendszergazdaként tegyük meg egyébként nem tudjuk a kódot feltölteni az Arduinonkra, eddigi tapasztalataim 
+                    alapján ez csak Linux rendszer használata esetén fordul elő.
+              </para>            
+        </caution> 
+
+        <para>
+            Itt látható a <function>void setup()</function> és a <function>void loop()</function> főporgram. A loop-ban tudjuk a <function>delay()</function> értékét 
+            változtatni, azaz hogy mennyi időközönként frissüljön a rácsunk, millisecundum-ban megadva. 
+        </para> 
+
+        <programlisting>
+        <![CDATA[void setup() {
+  Serial.begin(9600);
+  lcd.begin(16, 2);
+  GenerateRandomArray();
+  GenerateGolArray();
+  PrintToLCD();
+}
+ 
+void loop() {
+  delay(500);
+  UpdateBoard();
+  GenerateGolArray();
+  PrintToLCD();
+        ]]>
+        </programlisting>
+
+        <para>
+            A program elején meg kell hívnunk a <command>LiquidCrystal.h</command> header-t, ami az LCD kezeléséhez szükséges, illetve meg kell adnunk, hogy mely 
+            portokra csatlakoztattuk az LCD-t, hogy a mikrokontroller megfelelően tudjon vele kommunikálni illetve deklaráljuk a konstansainkat amik a játéktér méretét 
+            befolyásolják.
+        </para> 
+
+        <programlisting>
+        <![CDATA[#include <LiquidCrystal.h>
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+ 
+// Size we will use on the LCD panel
+const int maxRows = 16;
+const int maxCols = 20;
+        ]]></programlisting>
+
+        <para>
+            A játéktér másolására szolgáló eljárás az alábbi kódcsipetben látható, itt is a C++ programhoz hasonlóan két mátrixot, játékteret használunk.
+        </para> 
+
+        <programlisting><![CDATA[void CopyArray(bool gameBoard2[maxRows][maxCols]){
+    for(int a =0; a < maxRows; a++)
+    {
+        for(int b = 0; b < maxCols; b++)
+        {
+          gameBoard2[a][b] = gameBoard[a][b];
+        }
+    }
+}
+        ]]></programlisting>
+
+        <para>
+            Kiemelném a <function>void UpdateBoard()</function>-t, itt hívjuk meg a másolatkészítő függvényünket, a C++ programhoz hasonlóan itt 
+            is két "játékteret" használunk. és látható, hogy lehet végigvizsgálni azt 
+            pixelről pixelről pixelre, ami még fontosabb, ennek a kódrészletnek a végén találjuk az életjáték szabályait is.
+        </para> 
+
+        <programlisting>
+        <![CDATA[void UpdateBoard(){
+    bool gameBoard2[maxRows][maxCols] = {};
+ 
+    // Make a copy of the array
+    CopyArray(gameBoard2);
+ 
+    // Cycle through the columns of the array down
+    for(int a = 0; a < maxRows; a++)
+    {
+        // Cycle through the rows of the array across
+        for(int b = 0; b < maxCols; b++)
+        {
+            // We assume the cell is dead
+            int numOfTrues = 0;
+ 
+            // Used to check the value above and below the cell
+            for(int c = -1; c < 2; c++)
+            {
+                // Used to check the value to the left and right of the cell
+                for(int d = -1; d < 2; d++)
+                {
+                    // If we aren't checking the cell itself
+                    if(!(c == 0 && d == 0))
+                    {
+                        // Each time their is a true on the top, bottom,
+                        // right and left of the cell increment numOfTrues 
+                        if(gameBoard2[a+c][b+d])
+                        {
+                          ++numOfTrues;
+                        }
+                    }
+                }
+            }
+ 
+            // If their are less then 2 trues around the cell mark it as dead
+            if(numOfTrues < 2){gameBoard[a][b] = false;}
+ 
+            // If their is exactly 3 live cells mark it as alive
+            else if(numOfTrues == 3){gameBoard[a][b] = true;}
+ 
+            // If their are more then 3 live cells mark it as dead
+            else if(numOfTrues > 3){gameBoard[a][b] = false;}
+        }
+    }
+}
+        ]]></programlisting>
+
+        <para>
+            A <function>void PrintToLCD()</function> végzi a kiíratást, esetünkben a képernyő maga az LCD kijelző lesz.
+        </para> 
+
+        <programlisting>
+        <![CDATA[void PrintToLCD(){
+  
+  int startCol = 0;
+  for(int i = 0; i < (numOfChars/2); i++){
+ 
+    // Print row 1 on LCD
+    PrintChar(i, startCol, 0);
+ 
+    // Print row 2 on LCD
+    PrintChar(i + (numOfChars/2), startCol, 1);
+    startCol++;
+  }
+}
+        ]]></programlisting>
+
+
+        
+    </section>        
+  <!--  <section>
+        <title>8.4 BrainB Benchmark</title>
+        
+        <para>
+            Megoldás videó: 
+        </para>
+        <para>
+            Megoldás forrása: <link xlink:href=""></link>               
+        </para>
+        <para>
+            Aki, a félév elején bekapcsolódott a TP vadászatba, annak ismerős lesz ez a program. 
+            Ez a BrainB program Bátfai Norbert Tanár Úr illetve más fejlesztők által megírt program. Maga a program 
+            egy játék, ami gyakorlatilag egy pszichológiai teszt. A lényeg a következő: Van egy felületünk, amin félig átlátszó
+            négyzetek jelennek meg, ezek közül van egy kibálasztott különleges négyzet, amit Samu entrophy-nak nevezünk. 
+            A játék 10 perces, 10 per után leáll magától. A 10 perc leforgása alatt a játékosnak 1 feladata van, mégpedig, hogy a Samu 
+            entrophy-n tartsa az egerét lenyomott egérgombbal. Elsőre ez nem is tűnik olyan nehéz feladatnak viszont találkozunk nehezítő 
+            tényezőkkel. Ugyanolyan kinézetű négyzetek jelennek meg sorra mint a Samu entrophy, és mindegyikőjük apró mozgásokat végez.
+            Említettem, hogy félig átlátszóak ezek a négyzetek tehát valameddig lehet is követni a dolgot, de egy idő után szinte 
+            teljesen elveszítjük Samut. Pont emiatt érdekes teszt lehet, hogy a játék során a sajá karakterünket és annak körülményeit nem 
+            mi irányítjuk. A játék 10 perc, se kevesebb sem több, tehát nem ér véget a játék ha eetleg levszetettük Samut, ilyenkor meg kell
+            keresnünk! A program ezeket az elhaygyásokat is rögzíti és a végső kimenetében ezeket is számolj a teljesítményünk kiértékelésekor.
+        </para> 
+        <para>
+            A program folyamatosan vizsgálja és frissíti azokat az adatokat amelyek a végeredmény meghatározásáhhoz kellenek. Ilynek pl.:
+            Samu pozíciója illetve az egér pozíciója és az ezek közti távolság. Ezen kívűl említettem már, hogy ha elhagytuk Samut akkor 
+            sincs minden veszve, a forráskódban található egy függény, az "updateHeroes" itt tartja számon a program, hogy hányszor 
+            vesztettük el samu és a megtalálásokat is feljegyzi.
+        </para>  
+
+        <programlisting language='c++'>
+            <![CDATA[
+                void BrainBWin::updateHeroes ( const QImage &image, const int &x, const int &y )
+{
+
+        if ( start && !brainBThread->get_paused() ) {
+
+                int dist = ( this->mouse_x - x ) * ( this->mouse_x - x ) + ( this->mouse_y - y ) * ( this->mouse_y - y );
+
+                if ( dist > 121 ) {
+                        ++nofLost;
+                        nofFound = 0;
+                        if ( nofLost > 12 ) {
+
+                                if ( state == found && firstLost ) {
+                                        found2lost.push_back ( brainBThread->get_bps() );
+                                }
+
+                                firstLost = true;
+
+                                state = lost;
+                                nofLost = 0;
+                                //qDebug() << "LOST";
+                                //double mean = brainBThread->meanLost();
+                                //qDebug() << mean;
+
+                                brainBThread->decComp();
+                        }
+                } else {
+                        ++nofFound;
+                        nofLost = 0;
+                        if ( nofFound > 12 ) {
+
+                                if ( state == lost && firstLost ) {
+                                        lost2found.push_back ( brainBThread->get_bps() );
+                                }
+
+                                state = found;
+                                nofFound = 0;
+                                //qDebug() << "FOUND";
+                                //double mean = brainBThread->meanFound();
+                                //qDebug() << mean;
+
+                                brainBThread->incComp();
+                        }
+
+                }
+
+        }
+        pixmap = QPixmap::fromImage ( image );
+        update();
+}
+
+            ]]>
+        </programlisting>        
+    </section> -->
+
+    <section>
+        <title>Vörös pipacs pokol/ 19 RF</title>
+        <para>
+            A félév során volt egy feladat amiben, Bátfai Norbert Tanár Úr adott nekünk egy kódot amivel 
+            Steve 19 pipacs felszdeésére volt képes és ezt kellett úgy továbbfejlesztenünk, hogy több virágot
+            tudjon szedni, erről fogom csatolni a videónkat. A kód legnagyobb újítása a <function>calcNbrIndex</function> fügvény. 
+            ennek az a lényege, hogy amikor Steve elfordul akkor a körülötte érzékelt cuboid nem fordul vele együtt ezért nehéz a 
+            tömbb beli elemeket megfelelően hivatkozni, viszont ennek a fügvénynek a segítségével  <function>yaw</function>, azaz 
+            az elfordulás értékéből meg lehet határozni hogy éppen mi van Steve előtt mögött, tőle balra stb.
+        </para>
+        <programlisting language="python">
+            <![CDATA[ 
+            def calcNbrIndex(self):
+        if self.yaw >= 180-22.5 and self.yaw <= 180+22.5 :
+            self.front_of_me_idx = 1
+            self.front_of_me_idxr = 2
+            self.front_of_me_idxl = 0
+            self.right_of_me_idx = 5
+            self.left_of_me_idx = 3            
+        elif self.yaw >= 180+22.5 and self.yaw <= 270-22.5 :
+            self.front_of_me_idx = 2 
+            self.front_of_me_idxr = 5
+            self.front_of_me_idxl =1             
+            self.right_of_me_idx = 8
+            self.left_of_me_idx = 0            
+        elif self.yaw >= 270-22.5 and self.yaw <= 270+22.5 :
+            self.front_of_me_idx = 5
+            self.front_of_me_idxr = 8
+            self.front_of_me_idxl = 2
+            self.right_of_me_idx = 7
+            self.left_of_me_idx = 1                        
+        elif self.yaw >= 270+22.5 and self.yaw <= 360-22.5 :
+            self.front_of_me_idx = 8            
+            self.front_of_me_idxr = 7
+            self.front_of_me_idxl = 5          
+            self.right_of_me_idx = 6
+            self.left_of_me_idx = 2                        
+        elif self.yaw >= 360-22.5 or self.yaw <= 0+22.5 :
+            self.front_of_me_idx = 7
+            self.front_of_me_idxr = 6
+            self.front_of_me_idxl = 8
+            self.right_of_me_idx = 3
+            self.left_of_me_idx = 5                        
+        elif self.yaw >= 0+22.5 and self.yaw <= 90-22.5 :
+            self.front_of_me_idx = 6
+            self.front_of_me_idxr = 3
+            self.front_of_me_idxl = 7          
+            self.right_of_me_idx = 0
+            self.left_of_me_idx = 8                        
+        elif self.yaw >= 90-22.5 and self.yaw <= 90+22.5 :
+            self.front_of_me_idx = 3
+            self.front_of_me_idxr = 0
+            self.front_of_me_idxl = 6
+            self.right_of_me_idx = 1
+            self.left_of_me_idx = 7                        
+        elif self.yaw >= 90+22.5 and self.yaw <= 180-22.5 :
+            self.front_of_me_idx = 0
+            self.front_of_me_idxr = 1
+            self.front_of_me_idxl = 3
+            self.right_of_me_idx = 2
+            self.left_of_me_idx = 6                        
+        else:
+            print("There is great disturbance in the Force...")   
+    ]]>
+        </programlisting>
+
+        <para>
+            A program maga úgy működik, hogy Steve az aréna aljából elindul virágot szedni, amikor virágot érzékel a közelében akkor 
+            ránéz és kiüti azt. Gyakran előfordul ilyenkor, hogy "csapdába" esik mivel kiüti a pipacs alatt lévő földblokkot, ekkor ki kell ugrania a 
+            maga alatt ásott gödörből. Mivel az aréna úgy van megtervezve, hogy minden szinten pontosan 1 db virág található 
+            ezért ha egy szinten már megtalálta a virágot és azt felszedte Steve a <function>lvlUp</function> függvénnyel felmegy a következő szintre. 
+            A szinetket a <function>self.y</function> változóval tudjuk meghatározni.
+        </para>
+        <programlisting language="python"><![CDATA[ 
+        self.calcNbrIndex()                
+                        
+        if self.isInTrap(nbr) :
+            self.agent_host.sendCommand( "jumpmove 1" )
+            time.sleep(.1)
+            self.turnFromWall(nbr)
+            self.agent_host.sendCommand( "jumpmove 1" )
+            time.sleep(.1)            
+            return True
+
+        if self.lookingat == "red_flower":
+            print(" A RED FLOWER IS FOUND (lookingat)")
+            self.pickUp()
+            return True
+        
+        for i in range(9):
+            if nbr[i]=="red_flower" or nbr[i+9]=="red_flower" or nbr[i+18]=="red_flower":
+                print("        I CAN SEE A RED FLOWER: ", i, " LEVEL ", self.y)
+                if i == self.front_of_me_idx :
+                    print("F            A RED FLOWER IS RIGTH IN FRONT OF ME")
+                    self.agent_host.sendCommand( "move 1" )
+                    time.sleep(.2)
+                    self.agent_host.sendCommand( "look 1" )
+                    time.sleep(.2)
+                    print("Steve <) ", self.lookingat)
+                    return True
+                elif i == self.front_of_me_idxr :
+                    print("R            A RED FLOWER IS RIGTH IN RIGHT OF ME")
+                    self.agent_host.sendCommand( "strafe 1" )
+                    time.sleep(.2)
+                    return True
+                elif i == self.front_of_me_idxl :
+                    print("L            A RED FLOWER IS RIGTH IN LEFT OF ME")
+                    self.agent_host.sendCommand( "strafe -1" )
+                    time.sleep(.2)
+                    return True
+                elif i == 4  :
+                    self.red_flower_is_mining = True
+                    print("            I AM STANDING ON A RED FLOWER!!!")
+                    
+                    if self.pitch != 90:
+                        self.agent_host.sendCommand( "look 1" )
+                        print("PITCH            I AM STANDING ON A RED FLOWER!!!")
+                        time.sleep(.3)
+                    else:
+                        print("ATTACK            I AM STANDING ON A RED FLOWER!!! LEVEL ", self.y)
+                        self.pickUp()
+                        self.agent_host.sendCommand( "look -1" )
+                        time.sleep(.3)
+                    return True
+                
+                else :
+                    print("            I AM TURNING TO A RED FLOWER")
+                    self.agent_host.sendCommand( "turn 1" )
+                    time.sleep(.2)
+                    return True
+  
+        if self.lvlUp(nbr):
+            print("        LVL UP")
+
+        if nbr[self.front_of_me_idx+9]!="air" and nbr[self.front_of_me_idx+9]!="red_flower":
+            print("        THERE ARE OBSTACLES IN FRONT OF ME ",  nbr[self.front_of_me_idx], end='')
+  
+            self.turnFromWall(nbr)
+                        
+        else:
+            print("        THERE IS NO OBSTACLE IN FRONT OF ME", end='')
+            
+            if nbr[self.front_of_me_idx]=="dirt":
+                self.agent_host.sendCommand( "move 1" )
+                time.sleep(.013)
+            else:
+                self.turnFromWall(nbr)                
+                
+        return True        
+
+        ]]></programlisting>
+
+
+
+    </section>
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+</chapter>                
