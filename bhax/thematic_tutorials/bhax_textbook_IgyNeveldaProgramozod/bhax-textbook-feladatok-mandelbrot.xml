@@ -1373,17 +1373,17 @@ FrakAblak::FrakAblak(double a, double b, double c, double d,
              </para>
              <mediaobject>
             <imageobject>
-                <imagedata fileref ="./img/MandelbrotZoom_1_-2.0_0.7_-1.35_1.35.png" format="PNG" scale="40" />
+                <imagedata fileref ="./img/javazoom1.png" format="PNG" scale="40" />
             </imageobject>
         </mediaobject> 
         <mediaobject>
             <imageobject>
-                <imagedata fileref ="./img/MandelbrotZoom_1_-0.6229999999999998_-0.35299999999999976_0.36_0.63.png" format="PNG" scale="40" />
+                <imagedata fileref ="./img/javazoom2.png" format="PNG" scale="40" />
             </imageobject>
         </mediaobject> 
         <mediaobject>
             <imageobject>
-                <imagedata fileref ="./img/MandelbrotZoom_1_-0.3664999999999998_-0.09649999999999981_0.504_0.774.png" format="PNG" scale="40" />
+                <imagedata fileref ="./img/javazoom3.png" format="PNG" scale="40" />
             </imageobject>
         </mediaobject> 
     </section>
